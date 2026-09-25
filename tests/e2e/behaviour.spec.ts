@@ -332,7 +332,9 @@ test("Home is a filled pill and Away an outline, in the list and the calendar", 
   await expect(page.locator(".cal-pill--H").first()).toBeVisible();
   await expect(page.locator(".cal-pill--A").first()).toBeVisible();
   expect(await bg(".cal-pill--A:not(.is-past)")).toBe("rgba(0, 0, 0, 0)");
-  // Played matches in the calendar keep the shapes too.
+  expect(await bg(".cal-pill--H:not(.is-past)")).not.toBe("rgba(0, 0, 0, 0)");
+  // Played matches keep the shapes too (October has played home and away matches).
+  await open(page, "view=calendar&month=2026-10");
   expect(await bg(".cal-pill--A.is-past")).toBe("rgba(0, 0, 0, 0)");
   expect(await bg(".cal-pill--H.is-past")).not.toBe("rgba(0, 0, 0, 0)");
   await expect(page.locator(".cal-legend")).toContainText("Home");
