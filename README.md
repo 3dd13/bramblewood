@@ -1,12 +1,15 @@
 # Bramblewood Badminton Club fixtures
 
 A static website listing every match for all Bramblewood Badminton Club teams
-in the 2026/27 season. You can filter by team and by home/away, switch between
-a list and a calendar view, and subscribe to a calendar feed.
+in the 2026/27 season. It's organised around teams: an Overview of every team's
+next match, and a Fixtures page where you can pick one or more teams, filter
+home/away, and switch between a list and a calendar. Each team can be added to
+your calendar app as a subscription that updates automatically. The site has
+light and dark modes and works on phones.
 
-> **Status:** built and committed locally, **not yet published**. Deployment to
-> GitHub Pages is set up (`.github/workflows/deploy.yml`) but the GitHub
-> repository has not been created yet.
+> **Status:** built and committed locally, **not yet published**. The CI/CD
+> pipeline (`.github/workflows/ci.yml`) is ready, but the GitHub repository
+> hasn't been created yet (see DEPLOYMENT.md §4).
 
 ## Documents
 
@@ -14,8 +17,8 @@ a list and a calendar view, and subscribe to a calendar feed.
 |---|---|
 | [REQUIREMENTS.md](REQUIREMENTS.md) | What the site must do, and the constraints on it |
 | [EDITING.md](EDITING.md) | How club organisers add or change fixtures |
-| [DEPLOYMENT.md](DEPLOYMENT.md) | Publishing decision (build in CI, never commit `_site/`), pipeline, go-live checklist |
-| [TESTING.md](TESTING.md) | Test strategy; Playwright UI + screenshot tests (implemented), other stages (proposed) |
+| [DEPLOYMENT.md](DEPLOYMENT.md) | Publishing decision (build in CI, never commit `_site/`), CI/CD pipeline, repo settings, go-live checklist |
+| [TESTING.md](TESTING.md) | The 8 test stages: data, unit, calendar feeds, links, UI, screenshots, accessibility, privacy |
 | [AGENTS.md](AGENTS.md) | Guide for AI coding agents (Claude Code etc.) and developers |
 
 ## How it works
@@ -26,9 +29,11 @@ data/*.yaml ──► scripts/build.py ──► _site/ ──► GitHub Pages
 ```
 
 1. The fixtures live in `data/fixtures.yaml`, one entry per match.
-2. When you push to `main`, GitHub Actions runs `scripts/build.py`. It checks
-   the data (dates, teams, opponents, times, duplicates) and builds the site.
-3. If the data is valid, the site is deployed to GitHub Pages. If not, the
+2. When you push to `main`, GitHub Actions checks the data (dates, teams,
+   opponents, times, duplicates), builds the site, and runs the tests: unit,
+   calendar feeds, privacy guard, links, and browser tests with screenshots
+   and accessibility checks.
+3. If everything passes, the site is deployed to GitHub Pages. If not, the
    deploy stops and the live site stays as it was.
 
 ## Repository layout
@@ -39,9 +44,10 @@ data/
   teams.yaml         Bramblewood teams: code, name, league
   venues.yaml        home venue + opponent club venues
 scripts/build.py     validation + static site / .ics generation
-tests/               Playwright UI/visual tests + fictional test data
+scripts/privacy_check.py  guard against personal data and secrets
+tests/               unit (pytest) + Playwright UI/visual/a11y tests, fictional test data
 site/                front end (plain HTML/CSS/JS, no framework)
-.github/workflows/   build + deploy pipeline
+.github/             CI/CD workflow, screenshot-baseline workflow, Dependabot
 ```
 
 ## Local preview
@@ -58,12 +64,11 @@ Use `.venv/bin/python scripts/build.py --check` to check the data without buildi
 
 ## Tests
 
-UI and screenshot tests use Playwright. Node is needed for the tests only, not
-for building the site. See [TESTING.md](TESTING.md).
+Node is needed for the browser tests only, not for building the site. See [TESTING.md](TESTING.md).
 
 ```sh
-npm install && npx playwright install chromium   # one-time
-npm run test:e2e
+.venv/bin/pip install -r requirements-dev.txt && .venv/bin/python -m pytest   # unit tests
+npm install && npx playwright install chromium && npm run test:e2e           # browser tests
 ```
 
 ## Privacy and security

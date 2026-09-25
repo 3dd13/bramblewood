@@ -1,11 +1,11 @@
 name: Update screenshot baselines
 
-# Regenerates the Linux visual baselines (tests/__screenshots__/**/*-linux.png)
-# and commits them to the branch this is run on, so the change shows up as an
-# image diff in the pull request for review. Refuses to run on main.
+# Regenerates the Linux visual baselines (tests/__screenshots__/**/*-linux.png) and
+# commits them to the branch this is run on, so the change shows up as an image diff
+# in the pull request for review. Refuses to run on main. See TESTING.md §4.5.
 #
-# Note: commits made with GITHUB_TOKEN don't trigger other workflows. Re-run
-# the PR checks (or push another commit) after this finishes.
+# Commits made with GITHUB_TOKEN don't trigger other workflows: re-run the PR checks
+# (or push another commit) afterwards.
 
 on:
   workflow_dispatch:
@@ -22,15 +22,16 @@ jobs:
         run: |
           echo "::error::Run this on a feature branch, then merge via pull request."
           exit 1
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
-          python-version: "3.12"
+          python-version: "3.13"
           cache: pip
+          cache-dependency-path: requirements*.txt
       - run: pip install -r requirements.txt
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: 24
+          node-version: "24"
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
@@ -41,7 +42,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add tests/__screenshots__
+          git add tests/__screenshots__/
           if git diff --cached --quiet; then
             echo "Baselines unchanged."
           else

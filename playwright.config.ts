@@ -38,9 +38,9 @@ export default defineConfig({
   },
 
   projects: [
-    { name: "desktop-light", use: { ...desktop, colorScheme: "light" }, testMatch: /(behaviour|visual)\.spec\.ts/ },
-    { name: "desktop-dark", use: { ...desktop, colorScheme: "dark" }, testMatch: /visual\.spec\.ts/ },
-    { name: "phone-light", use: { ...phone, colorScheme: "light" }, testMatch: /(behaviour|visual)\.spec\.ts/ },
+    { name: "desktop-light", use: { ...desktop, colorScheme: "light" }, testMatch: /(behaviour|visual|a11y)\.spec\.ts/ },
+    { name: "desktop-dark", use: { ...desktop, colorScheme: "dark" }, testMatch: /(visual|a11y)\.spec\.ts/ },
+    { name: "phone-light", use: { ...phone, colorScheme: "light" }, testMatch: /(behaviour|visual|a11y)\.spec\.ts/ },
     { name: "phone-dark", use: { ...phone, colorScheme: "dark" }, testMatch: /visual\.spec\.ts/ },
     { name: "smoke", use: { ...desktop, baseURL: `http://localhost:${REAL_PORT}/` }, testMatch: /smoke\.spec\.ts/ },
   ],

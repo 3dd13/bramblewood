@@ -1,7 +1,8 @@
 # Deployment
 
-> **Status:** Decision **accepted** (§1). Pipeline changes in §3 are **proposed, not implemented yet**.
-> The site has not been published. No GitHub repository exists yet.
+> **Status:** the pipeline is implemented (`.github/workflows/ci.yml`). The site
+> has **not been published yet**, because the GitHub repository doesn't exist
+> yet. See §4.
 
 ## 1. Decision: source on `main`, build output never committed
 
@@ -15,77 +16,84 @@
 No `gh-pages` branch and no `/docs` folder.
 
 ### Why
-
-- **GitHub's own guidance.** GitHub offers two publishing sources: deploy from
-  a branch, or a GitHub Actions workflow. It suggests Actions when the site
-  uses a build tool other than Jekyll, or when you don't want to keep compiled
-  files on a branch. Both apply here: `scripts/build.py` generates
-  `index.html` and the `.ics` feeds.
+- **GitHub's guidance.** Pages can publish from a branch or from a GitHub
+  Actions workflow. GitHub suggests the workflow when the site uses a build
+  tool other than Jekyll, or when you don't want compiled files on a branch.
+  Both apply here: `scripts/build.py` generates `index.html` and the `.ics` feeds.
 - **No generated files in git.** Committing `_site/` would duplicate `data/`,
-  let the two drift apart, and add noisy diffs to every fixture edit. With
-  Actions, every deploy is a fresh, reproducible build of `main`.
-- **A `gh-pages` branch is a workaround** for external CI tools that can only
-  publish by pushing commits. It isn't needed when Actions can upload an
-  artifact directly.
-- **Privacy is unaffected either way.** A Pages site is public even if the
-  repository is private, so the rules in [AGENTS.md](AGENTS.md) are the real
-  safeguard, not repository visibility.
+  let the two drift apart, and add noisy diffs to every fixture edit. Every deploy is a fresh build of `main`.
+- **A `gh-pages` branch is a workaround** for CI tools that can only publish by pushing commits. It isn't needed here.
+- **A private repo wouldn't protect anything:** a Pages site is public even if the
+  repo is private. The rules in [AGENTS.md](AGENTS.md) are the real safeguard.
 
 ### Options considered
 
 | Option | Verdict |
 |---|---|
 | Commit `_site/` to `main` (root or `/docs`), deploy from branch | ✗ Generated files in source control, drift, and noisy history |
-| Build in CI, push output to a `gh-pages` branch | ✗ Extra branch and write token for no benefit; the older pattern |
+| Build in CI, push output to a `gh-pages` branch | ✗ Extra branch and write token for no benefit |
 | **Build in CI, deploy the artifact with `actions/deploy-pages`** | ✓ Chosen |
-| Cloudflare Pages / Netlify | Not now. Their main advantage is per-PR preview URLs. Worth revisiting only if previews become important. |
+| Cloudflare Pages / Netlify | Not now. Their main advantage is per-PR preview URLs. |
 
-## 2. Current pipeline (`.github/workflows/deploy.yml`)
+## 2. Pipeline
 
 ```
-push to main ─► build job: pip install → build.py (validates + builds) → upload-pages-artifact ─┐
-            └─► e2e job:   Playwright behaviour + visual + smoke tests → report artifact ────────┤
-                                                                                             deploy job (main only,
-                                                                                             needs build + e2e)
-pull request ─► build + e2e jobs only (no deploy)
+push / pull request
+ ├─ checks  : validate data → pytest (build, ICS, privacy guard) → build _site → privacy guard
+ │            → lychee link check → upload Pages artifact (main only)
+ ├─ e2e     : Playwright behaviour + visual + accessibility + smoke → report artifact
+ └─ deploy  : main only, needs checks + e2e → actions/deploy-pages → https://3dd13.github.io/bramblewood/
 ```
 
-A separate manual workflow, `update-screenshots.yml`, regenerates the Linux
-screenshot baselines on a branch (TESTING.md §4.5).
+| Workflow | Trigger | Purpose |
+|---|---|---|
+| `ci.yml` | push to `main`, pull requests, manual | Test everything; deploy from `main` |
+| `update-screenshots.yml` | manual, on a branch | Regenerate Linux screenshot baselines (TESTING.md §4) |
+| `.github/dependabot.yml` | weekly | Update pinned actions, pip and npm test tools (grouped PRs) |
 
-Permissions: `contents: read`, `pages: write`, `id-token: write`. No secrets are used.
+### Security measures
+- **Minimal permissions:** the workflow default is `contents: read`. Only the
+  `deploy` job gets `pages: write` + `id-token: write` (OIDC, no stored deploy
+  token). `checks` gets `pages: read` to configure Pages.
+- **Every action is pinned to a full commit SHA** with the version in a comment.
+  Dependabot keeps the pins up to date.
+- `actions/checkout` runs with `persist-credentials: false` in the CI jobs.
+- **The only secret** is the optional `PRIVACY_BLOCKLIST` (member names for the
+  privacy guard). It's never printed, and pull requests from forks don't get it,
+  so only the name check is skipped there.
+- **Deploy concurrency** group `pages` without cancelling, so a deploy is never
+  cut off halfway. Superseded PR runs are cancelled.
+- The `github-pages` environment is limited to `main` (see §3).
 
-## 3. Proposed changes (not implemented)
+## 3. Repository settings (when the repo is created)
 
-### 3.1 Workflow
-1. Upgrade `actions/upload-pages-artifact` **v3 → v4**, and add `actions/configure-pages@v5` before the build, following GitHub's current guidance.
-2. ✅ *Done for Playwright:* `deploy` needs both `build` and `e2e`, so a failing UI test blocks the release.
-   The remaining proposed test stages (TESTING.md §2) would join the same gate.
-3. **Pin every action to a full commit SHA** (with the version as a comment) instead of a moving tag like `@v4`.
-4. Add **Dependabot** (`.github/dependabot.yml`) for `github-actions` and `pip`, checking weekly.
+1. **Settings → Pages → Source:** "GitHub Actions".
+2. **Settings → Environments → `github-pages`:** deployment branches → `main` only.
+3. **Settings → Branches → rule for `main`:** require the status checks
+   `Data, unit tests, privacy, links` and `UI, visual and accessibility tests (Playwright)`.
+   - Edits made directly on github.com still commit to `main`. Protection doesn't
+     block them, but a failing check stops the deploy, so the live site stays safe.
+4. **Settings → Actions → General:** workflow permissions "Read repository
+   contents" (the default). Allow GitHub Actions to create PRs: off.
+5. **Settings → Secrets and variables → Actions:** add `PRIVACY_BLOCKLIST`
+   (one member name per line), taken from the club spreadsheet. Don't keep a copy in the repo.
+6. **Settings → Code security:** enable Dependabot alerts and secret scanning with push protection.
 
-### 3.2 Repository settings (when the repo is created)
-1. **Pages source:** "GitHub Actions".
-2. **`github-pages` environment:** limit deployment branches to `main`.
-3. **Branch protection on `main`:** require the `test` and `build` checks to pass before merging a PR.
-   - Edits made directly on github.com still commit to `main`. Protection doesn't block
-     those, but a failing check still stops the deploy, so the live site stays safe.
-4. Keep the default `GITHUB_TOKEN` permissions read-only.
-
-### 3.3 Previews
-GitHub Pages has no per-pull-request preview deployments. Instead:
-- CI tests on the PR, including Playwright screenshots attached to the run (see [TESTING.md](TESTING.md) §4).
-- Local preview: `python scripts/build.py && python3 -m http.server -d _site`.
-
-## 4. Going live checklist (when approved)
+## 4. Going live checklist
 
 - [ ] `gh auth login`, then create `3dd13/bramblewood` (public; Pages on a private repo needs GitHub Pro)
-- [ ] Push `main` (the first deploy will fail on missing Linux screenshot baselines. That's expected.)
-- [ ] Create a branch, run **Actions → Update screenshot baselines** on it, review the images, merge the PR
-- [ ] Settings → Pages → Source: **GitHub Actions**
-- [ ] Environment and branch protection rules from §3.2 (require `build` and `UI + visual tests (Playwright)`)
-- [ ] First deploy succeeds, and the site and `.ics` feeds load at `https://3dd13.github.io/bramblewood/`
+- [ ] Final audit: `git ls-files` contains only needed files, and there's no sensitive data in the history (see AGENTS.md)
+- [ ] Push `main`. The first run's Playwright job fails on missing Linux screenshot baselines. That's expected, and nothing deploys.
+- [ ] Settings from §3 (Pages source, environment, secret, security features)
+- [ ] Create a branch, run **Actions → Update screenshot baselines** on it, review the images, open a PR, and merge once green
+- [ ] The merge deploys. Check the site and `.ics` feeds at `https://3dd13.github.io/bramblewood/`
+- [ ] Enable branch protection (§3.3) once the check names have appeared at least once
 - [ ] Subscribe to one feed in Google and Apple Calendar to confirm it works
+
+## Previews
+GitHub Pages has no per-PR preview deployments. For review, use the Playwright
+report artifact (a screenshot of every page state) or a local preview:
+`python scripts/build.py && python3 -m http.server -d _site`.
 
 ## References
 - [GitHub Docs: Configuring a publishing source for your GitHub Pages site](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site)

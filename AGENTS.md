@@ -11,8 +11,8 @@ checks them and builds `_site/`: one `index.html` with the data inlined as JSON,
 the static assets, and iCalendar feeds in `calendar/*.ics`. GitHub Actions
 deploys `_site/` to GitHub Pages on every push to `main`. Requirements are in
 `REQUIREMENTS.md`, and the non-technical editing guide is `EDITING.md`.
-The publishing decision and pipeline are in `DEPLOYMENT.md`, and the test
-strategy is in `TESTING.md` (proposed, not yet implemented).
+The publishing decision and CI/CD pipeline are in `DEPLOYMENT.md`, and the test
+stages are in `TESTING.md`.
 
 ## Sensitive data — read before changing anything
 
@@ -55,9 +55,11 @@ with them, stop and explain.
 ## Commands
 
 ```sh
-python3 -m venv .venv && .venv/bin/pip install -r requirements.txt   # one-time setup
+python3 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt   # one-time setup
 .venv/bin/python scripts/build.py --check    # check data only
 .venv/bin/python scripts/build.py            # check + build into _site/
+.venv/bin/python -m pytest                   # unit tests: build, ICS feeds, privacy guard
+.venv/bin/python scripts/privacy_check.py    # privacy/secrets guard on data/ + _site/
 python3 -m http.server 8000 -d _site         # preview at http://localhost:8000
 ```
 
@@ -65,17 +67,21 @@ UI tests (Playwright; Node is **test-only**, never part of the site build, and n
 
 ```sh
 npm install && npx playwright install chromium   # one-time setup
-npm run test:e2e                                 # behaviour + visual + smoke tests
+npm run test:e2e                                 # behaviour + visual + a11y + smoke tests
 npm run test:e2e:update                          # accept new local (macOS) screenshots
 ```
+
+Workflow lint and link check (optional locally: `brew install actionlint lychee`):
+`actionlint` and `lychee --offline --root-dir "$PWD/_site" '_site/**/*.html' './*.md'`.
 
 Don't add bundlers, frameworks or runtime npm dependencies to the site. The site
 itself stays plain HTML/CSS/JS built by Python.
 
-Always run `scripts/build.py --check` after editing anything in `data/`, and
-`npm run test:e2e` after editing `site/`, `scripts/build.py` or `tests/`.
-If a UI change is intended, say which screenshots changed. Never commit
-`*-darwin.png` baselines: only CI-generated `*-linux.png` files are committed (TESTING.md §4.5).
+- After editing anything in `data/`: run `scripts/build.py --check`.
+- After editing `scripts/`: run `pytest`.
+- After editing `site/`, `scripts/build.py` or `tests/`: run `npm run test:e2e`.
+- If a UI change is intended, say which screenshots changed.
+- Never commit `*-darwin.png` baselines. Only CI-generated `*-linux.png` files are committed (TESTING.md §4).
 
 ## Layout
 
@@ -84,15 +90,19 @@ If a UI change is intended, say which screenshots changed. Never commit
 | `data/fixtures.yaml` | One entry per match. The master copy of fixtures. |
 | `data/teams.yaml` | Team `code` (used in fixtures), display `name`, `league`, `type`. List order decides team colour order. |
 | `data/venues.yaml` | `home` venue plus `clubs:` mapping club name → `{name, address}`. |
-| `scripts/build.py` | Loads YAML **as strings** via `yaml.compose` (no implicit date/number conversion, and keeps line numbers), checks it, writes `_site/`. |
-| `site/index.html` | Page shell. `__FIXTURES_JSON__` is replaced at build time. |
-| `site/app.js` | Vanilla JS (IIFE): state ↔ URL, list view, calendar view, subscribe links. |
-| `site/style.css` | CSS custom properties with a light palette and a `prefers-color-scheme: dark` override. |
-| `.github/workflows/deploy.yml` | Build + Playwright tests on push/PR; deploy to Pages on `main` only if both pass. |
+| `scripts/build.py` | Loads YAML **as strings** via `yaml.compose` (no implicit date/number conversion, and keeps line numbers), checks it, writes `_site/`. `--data`/`--out` options; `SOURCE_DATE_EPOCH` for reproducible builds. |
+| `scripts/privacy_check.py` | Fails on committed secrets or exports, emails, phones, personal-data fields, or blocklisted names. Never prints what it matched. |
+| `site/index.html` | Page shell. `__FIXTURES_JSON__` is replaced at build time; the `<head>` script applies the saved theme before first paint. |
+| `site/app.js` | Vanilla JS (IIFE), team-first UI: Overview/Fixtures pages (push/popstate), team selection, list/calendar, add-to-calendar panel, theme switch. |
+| `site/style.css` | Design tokens with a light palette, plus a dark palette for `[data-theme="dark"]` and for `prefers-color-scheme: dark` when no theme is chosen. |
+| `.github/workflows/ci.yml` | CI/CD: checks + Playwright on push/PR; deploy to Pages from `main` only when both pass. Actions pinned by SHA. |
 | `.github/workflows/update-screenshots.yml` | Manual: regenerate Linux screenshot baselines on a branch. |
-| `tests/data/` | **Fictional** data for UI tests. Never copy real fixtures or people into it. |
-| `tests/e2e/` | Playwright specs: `behaviour`, `visual` (screenshots) and `smoke` (real data). |
+| `.github/dependabot.yml` | Weekly grouped updates for actions, pip and npm. |
+| `tests/data/` | **Fictional** data for tests. Never copy real fixtures or people into it. |
+| `tests/unit/` | pytest: `test_build.py` (validation, output, ICS) and `test_privacy.py`. |
+| `tests/e2e/` | Playwright specs: `behaviour`, `visual` (screenshots), `a11y` (axe) and `smoke` (real data). |
 | `package.json`, `playwright.config.ts` | Test-only Node tooling. |
+| `requirements.txt` / `requirements-dev.txt` | Build dependency (PyYAML) / test dependencies (pytest, icalendar). |
 
 ## Data format
 
@@ -125,9 +135,13 @@ If a UI change is intended, say which screenshots changed. Never commit
 ## Workflow rules for agents
 
 - **Don't push, create GitHub repos, enable Pages or deploy without explicit user approval.** The user decides when the site goes live.
+- **Before any push to the public repo**, audit what would be published:
+  - `git ls-files`: only source, data, tests, docs and config. No scratch files, exports, local baselines, `node_modules` or build output.
+  - `git log -p`: no personal data or secrets anywhere in history.
+  - `scripts/privacy_check.py` passes, with the private blocklist set via `PRIVACY_BLOCKLIST_FILE`, a file outside the repo.
 - Commit only when asked. Commit messages should describe *what changed in the fixtures* (e.g. "Move CR Mens v Horsham to 12 Nov") for data changes.
 - When importing or bulk-editing fixtures from the spreadsheet, follow the cell rules in `REQUIREMENTS.md` §6. List anything skipped or ambiguous (`?`, `TBC`, missing times) for the user instead of guessing.
 - **Never commit build output** (`_site/`) or create a `gh-pages` branch or `/docs` folder. Pages deploys from the CI artifact (`DEPLOYMENT.md` §1).
-- Don't implement the still-proposed items in `DEPLOYMENT.md` §3 or `TESTING.md` §2 until the user approves them.
+- Prototype or scratch work goes in the session scratchpad or a git-ignored folder, never in tracked paths.
 - Don't invent venue addresses. Leave them blank until the user provides a source.
 - Keep `README.md`, `REQUIREMENTS.md`, `EDITING.md`, `DEPLOYMENT.md`, `TESTING.md` and this file in sync with behaviour changes.

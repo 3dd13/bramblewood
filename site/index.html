@@ -4,103 +4,51 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Bramblewood Fixtures</title>
-  <meta name="description" content="Match fixtures for all Bramblewood Badminton Club teams.">
-  <meta name="theme-color" content="#1f5f3f">
+  <meta name="description" content="Match fixtures for every Bramblewood Badminton Club team: dates, times, venues, and calendar feeds you can subscribe to.">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#4f46e5">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <script>
+    // Apply a saved light/dark choice before first paint (no flash). No saved choice = follow the system.
+    try { const t = localStorage.getItem("theme"); if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch {}
+  </script>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="site-header">
-    <div class="wrap">
+  <a class="skip" href="#main">Skip to fixtures</a>
+  <header class="hero">
+    <div class="wrap hero-inner">
       <div class="brand">
-        <img src="favicon.svg" alt="" width="40" height="40">
+        <svg class="logo" viewBox="0 0 48 48" aria-hidden="true">
+          <circle cx="24" cy="24" r="23" fill="var(--brand)"/>
+          <g fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M24 36 16 16h16z"/><path d="M24 36 20 16M24 36l4-20"/><path d="M17.5 20h13"/>
+          </g>
+          <circle cx="24" cy="36.5" r="4.2" fill="#fff"/>
+        </svg>
         <div>
           <h1>Bramblewood Badminton Club</h1>
-          <p class="subtitle">Match fixtures <span id="season"></span></p>
+          <p class="season"><span class="season-pill" data-season></span> <span class="season-text">season fixtures</span></p>
         </div>
       </div>
-      <p class="next-up" id="next-up" hidden></p>
+      <section class="next-card" id="next-card" aria-label="Next match"></section>
     </div>
   </header>
 
-  <main class="wrap">
-    <section class="controls" aria-label="Filters">
-      <div class="control-row">
-        <span class="control-label" id="teams-label">Teams</span>
-        <div class="chips" id="team-chips" role="group" aria-labelledby="teams-label"></div>
-      </div>
-      <div class="control-row control-row--split">
-        <div class="control-group">
-          <span class="control-label" id="ha-label">Venue</span>
-          <div class="segmented" id="ha-toggle" role="group" aria-labelledby="ha-label">
-            <button type="button" data-value="">All</button>
-            <button type="button" data-value="H">Home</button>
-            <button type="button" data-value="A">Away</button>
-          </div>
-        </div>
-        <div class="control-group">
-          <span class="control-label" id="view-label">View</span>
-          <div class="segmented" id="view-toggle" role="group" aria-labelledby="view-label">
-            <button type="button" data-value="list">List</button>
-            <button type="button" data-value="calendar">Calendar</button>
-          </div>
-        </div>
-        <label class="past-toggle">
-          <input type="checkbox" id="hide-past"> Hide past matches
-        </label>
-      </div>
-    </section>
-
-    <details class="subscribe" id="subscribe">
-      <summary>
-        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-        Add fixtures to your calendar
-      </summary>
-      <div class="subscribe-body">
-        <p>Subscribe once and your calendar app stays up to date whenever the fixtures change.</p>
-        <div class="subscribe-row">
-          <label for="sub-team" class="visually-hidden">Calendar</label>
-          <select id="sub-team"></select>
-          <a class="btn btn--primary" id="sub-webcal" href="#">Subscribe</a>
-          <a class="btn" id="sub-google" href="#" target="_blank" rel="noopener">Google Calendar</a>
-          <button type="button" class="btn" id="sub-copy">Copy link</button>
-        </div>
-        <p class="hint">On iPhone/Mac, <strong>Subscribe</strong> opens Apple Calendar. For Outlook, use <strong>Copy link</strong>, then choose “Add calendar → From internet”.</p>
-      </div>
-    </details>
-
-    <div id="list-view" class="list-view" hidden>
-      <div class="list-tools">
-        <span class="count" id="list-count"></span>
-        <button type="button" class="link-btn" id="jump-next" hidden>Jump to next match ↓</button>
-      </div>
-      <div id="list"></div>
+  <nav class="modebar" aria-label="Pages">
+    <div class="wrap modebar-inner">
+      <div class="modes" id="tabs"></div>
+      <button type="button" class="icon-btn theme-toggle" id="theme-toggle" aria-label="Switch to dark mode" title="Switch to dark mode"></button>
     </div>
+  </nav>
 
-    <div id="calendar-view" class="calendar-view" hidden>
-      <div class="cal-nav">
-        <button type="button" class="icon-btn" id="cal-prev" aria-label="Previous month">‹</button>
-        <h2 id="cal-title" aria-live="polite"></h2>
-        <button type="button" class="icon-btn" id="cal-next" aria-label="Next month">›</button>
-      </div>
-      <div class="cal-scroll">
-        <div class="cal-grid" id="cal-grid" role="grid"></div>
-      </div>
-      <div class="cal-agenda">
-        <div class="list-tools">
-          <span class="count" id="agenda-title"></span>
-          <button type="button" class="link-btn" id="agenda-all" hidden>Show whole month</button>
-        </div>
-        <div id="agenda"></div>
-      </div>
-    </div>
-  </main>
+  <main id="main" class="wrap" tabindex="-1"></main>
 
-  <footer class="site-footer wrap">
-    <p>Home matches are at <span id="home-venue"></span>. <span id="updated"></span></p>
+  <dialog id="cal-panel" class="cal-panel" aria-labelledby="cal-panel-h" aria-describedby="cal-panel-desc"></dialog>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner" id="footer"></div>
   </footer>
-
-  <noscript><p class="wrap">This page needs JavaScript to show the fixtures. You can still <a href="calendar/all.ics">download the full calendar</a>.</p></noscript>
 
   <script id="fixtures-data" type="application/json">__FIXTURES_JSON__</script>
   <script src="app.js"></script>
