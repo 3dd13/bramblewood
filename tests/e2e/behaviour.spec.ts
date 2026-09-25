@@ -328,15 +328,19 @@ test("Home is a filled pill and Away an outline, in the list and the calendar", 
   // Played matches keep the shape (filled vs outline), just in grey.
   expect(await bg(".match.is-past .ha--H")).not.toBe("rgba(0, 0, 0, 0)");
 
+  // Calendar: on desktop the label carries the shape; on phones the label shrinks to a dot, which does.
+  const phone = (page.viewportSize()?.width ?? 1280) <= 640;
+  const shape = (pill: string) => (phone ? `${pill} .dot` : pill);
   await open(page, "view=calendar&month=2026-11");
   await expect(page.locator(".cal-pill--H").first()).toBeVisible();
   await expect(page.locator(".cal-pill--A").first()).toBeVisible();
-  expect(await bg(".cal-pill--A:not(.is-past)")).toBe("rgba(0, 0, 0, 0)");
-  expect(await bg(".cal-pill--H:not(.is-past)")).not.toBe("rgba(0, 0, 0, 0)");
+  expect(await bg(shape(".cal-pill--H:not(.is-past)"))).not.toBe("rgba(0, 0, 0, 0)");
+  expect(await bg(shape(".cal-pill--A:not(.is-past)"))).toBe("rgba(0, 0, 0, 0)");
   // Played matches keep the shapes too (October has played home and away matches).
   await open(page, "view=calendar&month=2026-10");
-  expect(await bg(".cal-pill--A.is-past")).toBe("rgba(0, 0, 0, 0)");
-  expect(await bg(".cal-pill--H.is-past")).not.toBe("rgba(0, 0, 0, 0)");
+  expect(await bg(shape(".cal-pill--A.is-past"))).toBe("rgba(0, 0, 0, 0)");
+  expect(await bg(shape(".cal-pill--H.is-past"))).not.toBe("rgba(0, 0, 0, 0)");
+  await open(page, "view=calendar&month=2026-11");
   await expect(page.locator(".cal-legend")).toContainText("Home");
   await expect(page.locator(".cal-legend")).toContainText("Away");
 });
