@@ -61,11 +61,21 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements.txt   # one-time 
 python3 -m http.server 8000 -d _site         # preview at http://localhost:8000
 ```
 
-There's no Node toolchain. Don't add `package.json`, bundlers or frameworks
-unless the user asks for them.
+UI tests (Playwright; Node is **test-only**, never part of the site build, and no Bun):
 
-Always run `scripts/build.py --check` after editing anything in `data/`, and a
-full build plus a browser check after editing `site/` or the build script.
+```sh
+npm install && npx playwright install chromium   # one-time setup
+npm run test:e2e                                 # behaviour + visual + smoke tests
+npm run test:e2e:update                          # accept new local (macOS) screenshots
+```
+
+Don't add bundlers, frameworks or runtime npm dependencies to the site. The site
+itself stays plain HTML/CSS/JS built by Python.
+
+Always run `scripts/build.py --check` after editing anything in `data/`, and
+`npm run test:e2e` after editing `site/`, `scripts/build.py` or `tests/`.
+If a UI change is intended, say which screenshots changed. Never commit
+`*-darwin.png` baselines: only CI-generated `*-linux.png` files are committed (TESTING.md §4.5).
 
 ## Layout
 
@@ -78,7 +88,11 @@ full build plus a browser check after editing `site/` or the build script.
 | `site/index.html` | Page shell. `__FIXTURES_JSON__` is replaced at build time. |
 | `site/app.js` | Vanilla JS (IIFE): state ↔ URL, list view, calendar view, subscribe links. |
 | `site/style.css` | CSS custom properties with a light palette and a `prefers-color-scheme: dark` override. |
-| `.github/workflows/deploy.yml` | Build on push/PR, deploy to Pages on `main` only. |
+| `.github/workflows/deploy.yml` | Build + Playwright tests on push/PR; deploy to Pages on `main` only if both pass. |
+| `.github/workflows/update-screenshots.yml` | Manual: regenerate Linux screenshot baselines on a branch. |
+| `tests/data/` | **Fictional** data for UI tests. Never copy real fixtures or people into it. |
+| `tests/e2e/` | Playwright specs: `behaviour`, `visual` (screenshots) and `smoke` (real data). |
+| `package.json`, `playwright.config.ts` | Test-only Node tooling. |
 
 ## Data format
 
@@ -114,6 +128,6 @@ full build plus a browser check after editing `site/` or the build script.
 - Commit only when asked. Commit messages should describe *what changed in the fixtures* (e.g. "Move CR Mens v Horsham to 12 Nov") for data changes.
 - When importing or bulk-editing fixtures from the spreadsheet, follow the cell rules in `REQUIREMENTS.md` §6. List anything skipped or ambiguous (`?`, `TBC`, missing times) for the user instead of guessing.
 - **Never commit build output** (`_site/`) or create a `gh-pages` branch or `/docs` folder. Pages deploys from the CI artifact (`DEPLOYMENT.md` §1).
-- Don't implement the proposals in `DEPLOYMENT.md` §3 or `TESTING.md` until the user approves them.
+- Don't implement the still-proposed items in `DEPLOYMENT.md` §3 or `TESTING.md` §2 until the user approves them.
 - Don't invent venue addresses. Leave them blank until the user provides a source.
 - Keep `README.md`, `REQUIREMENTS.md`, `EDITING.md`, `DEPLOYMENT.md`, `TESTING.md` and this file in sync with behaviour changes.

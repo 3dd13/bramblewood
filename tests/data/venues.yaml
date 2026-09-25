@@ -1,0 +1,18 @@
+# FICTIONAL test data for UI tests. Addresses are made up.
+home:
+  name: Testtown Sports Hall
+  address: 1 Example Road, Testtown TT1 1AA
+
+clubs:
+  Riverside:
+    name: Riverside Leisure Centre
+    address: 2 River Lane, Rivertown RT2 2BB
+  Hilltop:
+    name: Hilltop School
+    address: 3 Hill Street, Hillville HV3 3CC
+  Meadow:
+    name: Meadow Hall
+    address: 4 Meadow Way, Fieldham FH4 4DD
+  Oakfield:
+    name: ""
+    address: ""   # deliberately blank → "Venue TBC"

@@ -43,10 +43,15 @@ No `gh-pages` branch and no `/docs` folder.
 ## 2. Current pipeline (`.github/workflows/deploy.yml`)
 
 ```
-push to main ─► build job: pip install → build.py (validates + builds) → upload-pages-artifact
-                   └─► deploy job (main only): deploy-pages → https://3dd13.github.io/bramblewood/
-pull request ─► build job only (validation, no deploy)
+push to main ─► build job: pip install → build.py (validates + builds) → upload-pages-artifact ─┐
+            └─► e2e job:   Playwright behaviour + visual + smoke tests → report artifact ────────┤
+                                                                                             deploy job (main only,
+                                                                                             needs build + e2e)
+pull request ─► build + e2e jobs only (no deploy)
 ```
+
+A separate manual workflow, `update-screenshots.yml`, regenerates the Linux
+screenshot baselines on a branch (TESTING.md §4.5).
 
 Permissions: `contents: read`, `pages: write`, `id-token: write`. No secrets are used.
 
@@ -54,11 +59,8 @@ Permissions: `contents: read`, `pages: write`, `id-token: write`. No secrets are
 
 ### 3.1 Workflow
 1. Upgrade `actions/upload-pages-artifact` **v3 → v4**, and add `actions/configure-pages@v5` before the build, following GitHub's current guidance.
-2. Split the work into three jobs:
-   ```
-   test  ─► build ─► deploy (main only)
-   ```
-   `deploy` needs `test` and `build`, so a failing test blocks the release. See [TESTING.md](TESTING.md).
+2. ✅ *Done for Playwright:* `deploy` needs both `build` and `e2e`, so a failing UI test blocks the release.
+   The remaining proposed test stages (TESTING.md §2) would join the same gate.
 3. **Pin every action to a full commit SHA** (with the version as a comment) instead of a moving tag like `@v4`.
 4. Add **Dependabot** (`.github/dependabot.yml`) for `github-actions` and `pip`, checking weekly.
 
@@ -78,9 +80,10 @@ GitHub Pages has no per-pull-request preview deployments. Instead:
 ## 4. Going live checklist (when approved)
 
 - [ ] `gh auth login`, then create `3dd13/bramblewood` (public; Pages on a private repo needs GitHub Pro)
-- [ ] Push `main`
+- [ ] Push `main` (the first deploy will fail on missing Linux screenshot baselines. That's expected.)
+- [ ] Create a branch, run **Actions → Update screenshot baselines** on it, review the images, merge the PR
 - [ ] Settings → Pages → Source: **GitHub Actions**
-- [ ] Environment and branch protection rules from §3.2
+- [ ] Environment and branch protection rules from §3.2 (require `build` and `UI + visual tests (Playwright)`)
 - [ ] First deploy succeeds, and the site and `.ics` feeds load at `https://3dd13.github.io/bramblewood/`
 - [ ] Subscribe to one feed in Google and Apple Calendar to confirm it works
 

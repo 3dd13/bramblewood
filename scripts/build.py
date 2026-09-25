@@ -2,12 +2,16 @@
 """Validate the data files and build the static site into _site/.
 
 Usage:
-    python scripts/build.py            # validate + build
-    python scripts/build.py --check    # validate only
+    python scripts/build.py                  # validate + build
+    python scripts/build.py --check          # validate only
+    python scripts/build.py --data tests/data --out _site-test   # build test fixtures
+
+Set SOURCE_DATE_EPOCH to fix the build timestamp (used for reproducible test builds).
 
 Errors are printed with file and line numbers. On GitHub Actions they are
 also emitted as annotations so they show up on the commit.
 """
+import argparse
 import datetime as dt
 import json
 import os
@@ -19,9 +23,9 @@ from pathlib import Path
 import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
-DATA = ROOT / "data"
+DATA = ROOT / "data"  # overridden by --data
 SITE_SRC = ROOT / "site"
-OUT = ROOT / "_site"
+OUT = ROOT / "_site"  # overridden by --out
 
 CLUB_NAME = "Bramblewood"
 TIMEZONE = "Europe/London"
@@ -29,6 +33,20 @@ MATCH_DURATION = dt.timedelta(hours=2, minutes=30)
 ON_CI = os.environ.get("GITHUB_ACTIONS") == "true"
 
 errors = []
+
+
+def build_time():
+    epoch = os.environ.get("SOURCE_DATE_EPOCH")
+    if epoch:
+        return dt.datetime.fromtimestamp(int(epoch), dt.timezone.utc)
+    return dt.datetime.now(dt.timezone.utc)
+
+
+def rel(path):
+    try:
+        return path.relative_to(ROOT).as_posix()
+    except ValueError:
+        return path.as_posix()
 
 
 def error(file, line, msg):
@@ -244,7 +262,7 @@ def ics_fold(line):
 
 
 def build_ics(name, fixtures, teams_by_code, site_url):
-    stamp = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    stamp = build_time().strftime("%Y%m%dT%H%M%SZ")
     lines = [
         "BEGIN:VCALENDAR",
         "VERSION:2.0",
@@ -291,16 +309,23 @@ def build_ics(name, fixtures, teams_by_code, site_url):
 def report_errors():
     print(f"\n✗ Found {len(errors)} problem(s) in the data files:\n", file=sys.stderr)
     for file, line, msg in errors:
-        where = f"data/{file}" + (f":{line}" if line else "")
+        where = f"{rel(DATA)}/{file}" + (f":{line}" if line else "")
         print(f"  {where}  {msg}", file=sys.stderr)
         if ON_CI:
-            loc = f"file=data/{file}" + (f",line={line}" if line else "")
+            loc = f"file={rel(DATA)}/{file}" + (f",line={line}" if line else "")
             print(f"::error {loc}::{msg}")
     print(file=sys.stderr)
 
 
 def main():
-    check_only = "--check" in sys.argv
+    global DATA, OUT
+    parser = argparse.ArgumentParser(description="Validate fixture data and build the site.")
+    parser.add_argument("--check", action="store_true", help="validate only, don't build")
+    parser.add_argument("--data", type=Path, default=DATA, help="data directory (default: data/)")
+    parser.add_argument("--out", type=Path, default=OUT, help="output directory (default: _site/)")
+    args = parser.parse_args()
+    DATA, OUT = args.data.resolve(), args.out.resolve()
+    check_only = args.check
     site_url = os.environ.get("SITE_URL", "").rstrip("/")
 
     teams = read_teams()
@@ -328,7 +353,7 @@ def main():
             build_ics(f"{CLUB_NAME} – {t['code']}", mine, teams_by_code, site_url), encoding="utf-8")
 
     payload = {
-        "generated": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
+        "generated": build_time().isoformat(timespec="seconds"),
         "home": home,
         "teams": teams,
         "fixtures": fixtures,
@@ -340,7 +365,7 @@ def main():
     index.write_text(index.read_text(encoding="utf-8")
                      .replace("__FIXTURES_JSON__", data_json.replace("</", "<\\/")), encoding="utf-8")
     (OUT / ".nojekyll").touch()
-    print(f"✓ Built site into {OUT.relative_to(ROOT)}/")
+    print(f"✓ Built site into {rel(OUT)}/")
 
 
 if __name__ == "__main__":

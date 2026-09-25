@@ -1,0 +1,80 @@
+# FICTIONAL test data for UI tests. Tests freeze "today" at 2026-11-15 (Sunday).
+# Changing this file changes the visual baselines: update them deliberately.
+
+# ── October 2026 (past) ───────────────────
+- date: 2026-10-08
+  team: AA Mens
+  home_away: H
+  opponent: Riverside A
+  time: "20:00"
+- date: 2026-10-16
+  team: BB Mixed
+  home_away: A
+  opponent: Hilltop
+  time: "19:30"
+- date: 2026-10-23
+  team: CC Ladies
+  home_away: H
+  opponent: Meadow
+  time: "20:00"
+
+# ── November 2026 ─────────────────────────
+- date: 2026-11-12
+  team: DD Combi
+  home_away: A
+  opponent: Riverside B
+  time: "19:45"
+- date: 2026-11-17
+  team: AA Mens
+  home_away: A
+  opponent: Hilltop
+  time: "19:30"
+- date: 2026-11-20
+  team: BB Mixed
+  home_away: H
+  opponent: Meadow
+  time: "20:00"
+- date: 2026-11-20
+  team: CC Ladies
+  home_away: A
+  opponent: Riverside A
+  time: "20:00"
+- date: 2026-11-26
+  team: DD Combi
+  home_away: H
+  opponent: Oakfield
+  time: "20:00"
+- date: 2026-11-30
+  team: AA Mens
+  home_away: A
+  opponent: Oakfield
+  time: "19:30"
+
+# ── December 2026 ─────────────────────────
+- date: 2026-12-04
+  team: AA Mens
+  home_away: H
+  opponent: Meadow
+  time: "20:00"
+- date: 2026-12-11
+  team: CC Ladies
+  home_away: H
+  opponent: Hilltop
+  time: "20:00"
+  notes: Rearranged from 27 Nov
+- date: 2026-12-13
+  team: BB Mixed
+  home_away: A
+  opponent: Riverside B
+  time: "18:00"
+
+# ── January 2027 ──────────────────────────
+- date: 2027-01-15
+  team: DD Combi
+  home_away: A
+  opponent: Meadow
+- date: 2027-01-22
+  team: AA Mens
+  home_away: H
+  opponent: Riverside B
+  time: "20:00"

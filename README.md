@@ -15,7 +15,7 @@ a list and a calendar view, and subscribe to a calendar feed.
 | [REQUIREMENTS.md](REQUIREMENTS.md) | What the site must do, and the constraints on it |
 | [EDITING.md](EDITING.md) | How club organisers add or change fixtures |
 | [DEPLOYMENT.md](DEPLOYMENT.md) | Publishing decision (build in CI, never commit `_site/`), pipeline, go-live checklist |
-| [TESTING.md](TESTING.md) | Test strategy incl. Playwright UI + screenshot tests (proposed) |
+| [TESTING.md](TESTING.md) | Test strategy; Playwright UI + screenshot tests (implemented), other stages (proposed) |
 | [AGENTS.md](AGENTS.md) | Guide for AI coding agents (Claude Code etc.) and developers |
 
 ## How it works
@@ -39,13 +39,14 @@ data/
   teams.yaml         Bramblewood teams: code, name, league
   venues.yaml        home venue + opponent club venues
 scripts/build.py     validation + static site / .ics generation
+tests/               Playwright UI/visual tests + fictional test data
 site/                front end (plain HTML/CSS/JS, no framework)
 .github/workflows/   build + deploy pipeline
 ```
 
 ## Local preview
 
-You need Python 3.9 or later. Node isn't used.
+You need Python 3.9 or later. Building the site doesn't need Node. The tests do (see below).
 
 ```sh
 python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
@@ -54,6 +55,16 @@ python3 -m http.server 8000 -d _site       # open http://localhost:8000
 ```
 
 Use `.venv/bin/python scripts/build.py --check` to check the data without building.
+
+## Tests
+
+UI and screenshot tests use Playwright. Node is needed for the tests only, not
+for building the site. See [TESTING.md](TESTING.md).
+
+```sh
+npm install && npx playwright install chromium   # one-time
+npm run test:e2e
+```
 
 ## Privacy and security
 

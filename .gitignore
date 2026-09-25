@@ -24,3 +24,14 @@ token*.json
 *.csv
 *.ods
 exports/
+
+# Test tooling (Playwright, Node is test-only)
+node_modules/
+_site-test/
+_site-smoke/
+test-results/
+playwright-report/
+blob-report/
+# Visual baselines: only Linux (CI) baselines are committed
+tests/__screenshots__/**/*-darwin.png
+tests/__screenshots__/**/*-win32.png

@@ -1,0 +1,20 @@
+# FICTIONAL test data for UI tests (TESTING.md §4.3). Never put real people here.
+- code: AA Mens
+  name: Alpha Men's
+  league: Test League North
+  type: Men's
+
+- code: BB Mixed
+  name: Bravo Mixed
+  league: Test League North
+  type: Mixed
+
+- code: CC Ladies
+  name: Charlie Ladies
+  league: Test League South
+  type: Ladies
+
+- code: DD Combi
+  name: Delta Combi
+  league: Test League South
+  type: Mixed

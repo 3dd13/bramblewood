@@ -1,0 +1,17 @@
+{
+  "name": "bramblewood-fixtures-tests",
+  "private": true,
+  "description": "UI and visual tests for the Bramblewood fixtures site (test tooling only; the site build is Python).",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test:e2e": "playwright test",
+    "test:e2e:update": "playwright test --update-snapshots",
+    "test:e2e:report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0"
+  }
+}

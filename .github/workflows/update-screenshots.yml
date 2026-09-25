@@ -1,0 +1,50 @@
+name: Update screenshot baselines
+
+# Regenerates the Linux visual baselines (tests/__screenshots__/**/*-linux.png)
+# and commits them to the branch this is run on, so the change shows up as an
+# image diff in the pull request for review. Refuses to run on main.
+#
+# Note: commits made with GITHUB_TOKEN don't trigger other workflows. Re-run
+# the PR checks (or push another commit) after this finishes.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Refuse to run on main
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "::error::Run this on a feature branch, then merge via pull request."
+          exit 1
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test tests/e2e/visual.spec.ts --update-snapshots=all
+        env:
+          PYTHON: python
+      - name: Commit updated baselines
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tests/__screenshots__
+          if git diff --cached --quiet; then
+            echo "Baselines unchanged."
+          else
+            git commit -m "Update visual baselines (Linux)"
+            git push
+          fi
