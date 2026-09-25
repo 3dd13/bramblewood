@@ -7,9 +7,8 @@ home/away, and switch between a list and a calendar. Each team can be added to
 your calendar app as a subscription that updates automatically. The site has
 light and dark modes and works on phones.
 
-> **Status:** built and committed locally, **not yet published**. The CI/CD
-> pipeline (`.github/workflows/ci.yml`) is ready, but the GitHub repository
-> hasn't been created yet (see DEPLOYMENT.md §4).
+> **Live site:** https://3dd13.github.io/bramblewood/
+> Calendar feeds: `https://3dd13.github.io/bramblewood/calendar/<team>.ics` (or `all.ics`).
 
 ## Documents
 

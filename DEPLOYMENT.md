@@ -1,8 +1,7 @@
 # Deployment
 
-> **Status:** the pipeline is implemented (`.github/workflows/ci.yml`). The site
-> has **not been published yet**, because the GitHub repository doesn't exist
-> yet. See §4.
+> **Status:** live at https://3dd13.github.io/bramblewood/ since 2026-09-25,
+> deployed by `.github/workflows/ci.yml` from `main`. Repository: https://github.com/3dd13/bramblewood
 
 ## 1. Decision: source on `main`, build output never committed
 
@@ -65,7 +64,7 @@ push / pull request
   cut off halfway. Superseded PR runs are cancelled.
 - The `github-pages` environment is limited to `main` (see §3).
 
-## 3. Repository settings (when the repo is created)
+## 3. Repository settings (applied 2026-09-25)
 
 1. **Settings → Pages → Source:** "GitHub Actions".
 2. **Settings → Environments → `github-pages`:** deployment branches → `main` only.
@@ -75,20 +74,26 @@ push / pull request
      block them, but a failing check stops the deploy, so the live site stays safe.
 4. **Settings → Actions → General:** workflow permissions "Read repository
    contents" (the default). Allow GitHub Actions to create PRs: off.
-5. **Settings → Secrets and variables → Actions:** add `PRIVACY_BLOCKLIST`
+5. **Not set yet (owner's decision, 2026-09-25):** the name check has only been run locally so far. When wanted, add **Settings → Secrets and variables → Actions:** `PRIVACY_BLOCKLIST`
    (one member name per line), taken from the club spreadsheet. Don't keep a copy in the repo.
 6. **Settings → Code security:** enable Dependabot alerts and secret scanning with push protection.
 
-## 4. Going live checklist
+## 4. Going live (done 2026-09-25)
 
-- [ ] `gh auth login`, then create `3dd13/bramblewood` (public; Pages on a private repo needs GitHub Pro)
-- [ ] Final audit: `git ls-files` contains only needed files, and there's no sensitive data in the history (see AGENTS.md)
-- [ ] Push `main`. The first run's Playwright job fails on missing Linux screenshot baselines. That's expected, and nothing deploys.
-- [ ] Settings from §3 (Pages source, environment, secret, security features)
-- [ ] Create a branch, run **Actions → Update screenshot baselines** on it, review the images, open a PR, and merge once green
-- [ ] The merge deploys. Check the site and `.ics` feeds at `https://3dd13.github.io/bramblewood/`
-- [ ] Enable branch protection (§3.3) once the check names have appeared at least once
-- [ ] Subscribe to one feed in Google and Apple Calendar to confirm it works
+- [x] Created the public repo `3dd13/bramblewood`. Commits use the GitHub no-reply address `223555+3dd13@users.noreply.github.com`, so no personal email is published.
+- [x] Final audit: only needed files are tracked, and there's no personal data or secrets in the history. Checked against the private name list locally.
+- [x] Settings from §3: Pages source, environment, Actions token, security features and branch protection
+- [x] First push: the checks passed, and the Playwright job failed only on the missing Linux baselines (expected)
+- [x] Generated the baselines with **Update screenshot baselines** on a branch (PR #3), reviewed them, and merged once green
+- [x] Deployed. The site, `fixtures.json` and all `.ics` feeds are served (`text/calendar`, 84 events in `all.ics`)
+- [ ] Subscribe to one feed in Google and Apple Calendar to confirm it works (owner)
+- [ ] Optional: add the `PRIVACY_BLOCKLIST` secret (§3.5)
+
+### Merging without exposing a personal email
+Merges made with GitHub's web button use the account's commit email. Either
+turn on **GitHub → Settings → Emails → "Keep my email addresses private"**
+(and "Block command line pushes that expose my email"), or merge green PRs as a
+fast-forward from a clone (`git merge --ff-only <branch> && git push`).
 
 ## Previews
 GitHub Pages has no per-PR preview deployments. For review, use the Playwright
