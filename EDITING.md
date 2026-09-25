@@ -44,6 +44,21 @@ The calendar feeds (`.ics`) update with every deploy. Subscribed calendars pick
 up changes the next time they refresh, which can take from a few hours up to a
 day for Google Calendar.
 
+## Keep it public-safe
+
+The website and this repository are **public**.
+
+- Don't add player names (not even first names), contact details or who can
+  or can't play. That includes the `notes:` field.
+- Only use public venue addresses (sports halls, schools, leisure centres).
+- Never paste passwords, API keys or other credentials into any file.
+- Don't upload spreadsheet exports of the club sheet. They include members'
+  personal answers.
+
+If something private gets committed by mistake, tell the repository owner
+straight away. Deleting it in a new commit isn't enough, because it stays
+in the history.
+
 ## Previewing locally (optional)
 
 ```sh

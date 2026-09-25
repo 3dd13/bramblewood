@@ -1,4 +1,26 @@
+# Build output / local tooling
 _site/
 .venv/
 __pycache__/
 .DS_Store
+
+# Secrets and credentials: never commit these (see AGENTS.md)
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+credentials*.json
+service-account*.json
+*-sa.json
+client_secret*.json
+token*.json
+.secrets/
+
+# Spreadsheet exports may contain personal data from the club's form tabs
+*.xlsx
+*.xls
+*.csv
+*.ods
+exports/
