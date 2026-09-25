@@ -1,5 +1,7 @@
 # Bramblewood teams for the current season.
-# `code` is what you type in fixtures.yaml. Colours are assigned by the order below.
+# `code` is what you type in fixtures.yaml.
+# Colours: each league gets a colour family (in order of first appearance below:
+# greens, reds, blues, purples); within a league shades run Men's → Mixed → Ladies.
 #
 # Optional:
 #   division:    the division name as the league writes it (shown after the league name)

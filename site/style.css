@@ -7,6 +7,8 @@
   --surface-2: #f7f8fc;
   --ink: #161b2e;
   --muted: #5b6480;
+  --ha-fill: #4a5163;   /* Home = filled grey, Away = grey outline (shape, not colour) */
+  --ha-on: #ffffff;
   --line: #e3e7f1;
   --brand: #4f46e5;
   --brand-ink: #3730a3;
@@ -36,6 +38,8 @@
   --surface-2: #1b2340;
   --ink: #eaeefa;
   --muted: #a0a9c6;
+  --ha-fill: #c2c8d6;
+  --ha-on: #161d33;
   --line: #28314f;
   --brand: #8b85ff;
   --brand-ink: #b9b5ff;
@@ -60,6 +64,8 @@
     --surface-2: #1b2340;
     --ink: #eaeefa;
     --muted: #a0a9c6;
+    --ha-fill: #c2c8d6;
+    --ha-on: #161d33;
     --line: #28314f;
     --brand: #8b85ff;
     --brand-ink: #b9b5ff;
@@ -179,8 +185,9 @@ body[data-page="fixtures"] .season-pill { font-size: 0.78rem; padding: 2px 10px;
 }
 .badge .dot { width: 8px; height: 8px; box-shadow: none; }
 .ha { display: inline-flex; align-items: center; gap: 4px; font-size: 0.78rem; font-weight: 800; border-radius: 999px; padding: 3px 10px 3px 8px; white-space: nowrap; }
-.ha--H { background: color-mix(in srgb, #16a34a 14%, var(--surface)); color: color-mix(in srgb, #16a34a var(--tc-ink-amt), var(--tc-ink-base)); }
-.ha--A { background: color-mix(in srgb, #ea580c 13%, var(--surface)); color: color-mix(in srgb, #ea580c var(--tc-ink-amt), var(--tc-ink-base)); }
+/* Home = filled, Away = outline: shape carries the meaning, so it never clashes with team colours. */
+.ha--H { background: var(--ha-fill); color: var(--ha-on); }
+.ha--A { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ha-fill); }
 .played { display: inline-flex; align-items: center; gap: 4px; font-size: 0.78rem; font-weight: 700; color: var(--muted); }
 .time { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
 .venue, .venue-inline { display: inline-flex; align-items: flex-start; gap: 6px; min-width: 0; }
@@ -436,7 +443,10 @@ main { padding-block: 28px 56px; outline: none; }
 .match.is-past { box-shadow: none; background: var(--surface-2); }
 .match.is-past .match-opp, .match.is-past .match-meta { color: var(--muted); }
 .match.is-past .tile { background: var(--surface); color: var(--muted); border-color: var(--line); }
-.match.is-past .badge, .match.is-past .ha { background: var(--surface); color: var(--muted); border: 1px solid var(--line); }
+.match.is-past .badge { background: var(--surface); color: var(--muted); border: 1px solid var(--line); }
+/* Played matches keep the Home/Away shape, in grey. */
+.match.is-past .ha--H { background: var(--muted); color: var(--surface); }
+.match.is-past .ha--A { color: var(--muted); box-shadow: inset 0 0 0 1.5px var(--muted); }
 .match.is-next {
   border: 2px solid var(--tc); box-shadow: 0 0 0 5px color-mix(in srgb, var(--tc) 14%, transparent), var(--shadow-lg);
   padding-top: 26px;
@@ -484,6 +494,16 @@ main { padding-block: 28px 56px; outline: none; }
 .pill-text { min-width: 0; flex: 1; line-height: 1.2; white-space: normal; overflow-wrap: normal; word-break: keep-all; hyphens: none; }
 .pill-ha { flex: none; opacity: 0.8; }
 .cal-hint { margin-top: 10px; font-size: 0.82rem; color: var(--muted); text-align: center; }
+/* Calendar: filled label/dot = Home, outlined = Away. */
+.cal-pill--A { background: transparent; box-shadow: inset 0 0 0 1.5px var(--tc); }
+/* Played: same shapes in grey (the fill stays light enough for 4.5:1 text). */
+.cal-pill--H.is-past { background: color-mix(in srgb, var(--muted) 14%, var(--surface)); box-shadow: none; }
+.cal-pill--A.is-past { background: transparent; box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--muted) 60%, transparent); }
+.cal-legend { display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 10px; font-size: 0.82rem; color: var(--muted); font-weight: 650; }
+.cal-legend .lg { display: inline-block; width: 11px; height: 11px; border-radius: 50%; margin-left: 10px; }
+.cal-legend .lg:first-child { margin-left: 0; }
+.cal-legend .lg--H { background: var(--ha-fill); }
+.cal-legend .lg--A { box-shadow: inset 0 0 0 2px var(--ha-fill); }
 .agenda { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--shadow); padding: 16px; }
 .agenda-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 12px; }
 .agenda-head h3 { font-size: 1.05rem; font-weight: 850; }
@@ -579,7 +599,9 @@ main { padding-block: 28px 56px; outline: none; }
   .cal-cell { min-height: 50px; padding: 4px 2px; align-items: center; border-radius: 12px; }
   .cal-pills { display: flex; flex-wrap: wrap; justify-content: center; gap: 3px; }
   .cal-pill { padding: 0; background: none; }
-  .cal-pill .dot { display: block; width: 8px; height: 8px; }
+  .cal-pill .dot { display: block; width: 10px; height: 10px; }
+  .cal-pill--A .dot { background: transparent; box-shadow: inset 0 0 0 2.5px var(--tc); }
+  .cal-pill--A { box-shadow: none; }  /* phone: the dot itself is the ring */
   .pill-text, .pill-ha { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   .cal-hint { display: block; }
 }

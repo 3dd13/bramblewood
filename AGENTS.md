@@ -88,7 +88,7 @@ itself stays plain HTML/CSS/JS built by Python.
 | Path | Purpose |
 |---|---|
 | `data/fixtures.yaml` | One entry per match. The master copy of fixtures. |
-| `data/teams.yaml` | Team `code` (used in fixtures), display `name`, `league`, `type`, optional `division` and `results_url` (https only; the league's results/table page). List order decides team colour order. |
+| `data/teams.yaml` | Team `code` (used in fixtures), display `name`, `league`, `type`, optional `division` and `results_url` (https only; the league's results/table page). Colours come from the league (one family per league, Men's → Mixed → Ladies within it; see `FAMILIES` in `site/app.js`). |
 | `data/venues.yaml` | `home` venue plus `clubs:` mapping club name → `{name, address, leagues?}`. `leagues:` (keyed by the `league` in teams.yaml) gives a club a different venue in that league. |
 | `scripts/build.py` | Loads YAML **as strings** via `yaml.compose` (no implicit date/number conversion, and keeps line numbers), checks it, writes `_site/`. `--data`/`--out` options; `SOURCE_DATE_EPOCH` for reproducible builds. |
 | `scripts/privacy_check.py` | Fails on committed secrets or exports, emails, phones, personal-data fields, or blocklisted names. Never prints what it matched. |
@@ -130,6 +130,7 @@ itself stays plain HTML/CSS/JS built by Python.
 - **ICS:** CRLF line endings, lines folded at 75 octets, text escaped with `ics_escape`, times in `TZID=Europe/London` with the bundled VTIMEZONE.
 - **Style:** match the existing code: small functions, section banner comments (`// ── Name ──`), sparse comments that explain *why*.
 - **Validation errors** must include the file, line and a fix hint, written for a non-technical editor.
+- **Colour is never the only signal:** team codes are always shown as text, and Home/Away uses shape (filled vs outline). Don't reintroduce coloured Home/Away pills, which clash with the league colour families.
 - **User-facing text:** British English (en-GB), date format like "Tuesday 6 October", 12-hour times like "7:30pm".
 
 ## Workflow rules for agents

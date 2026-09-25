@@ -309,3 +309,32 @@ test("team filter is alphabetical regardless of teams.yaml order", async ({ page
   // The selection title and results links follow the same order.
   await expect(page.locator("#sel-h")).toHaveText("2 teams: AA Mens, DD Combi");
 });
+
+test("team colours come in one family per league, Men's → Mixed → Ladies", async ({ page }) => {
+  await open(page, "view=list");
+  const colour = (code: string) => page.locator(".teambar .tteam", { hasText: code }).evaluate((b) => b.style.getPropertyValue("--tc"));
+  // Test League South appears first in teams.yaml (DD Combi) → greens; North → reds.
+  expect(await colour("DD Combi")).toBe("#2b8f22"); // Mixed before Ladies
+  expect(await colour("CC Ladies")).toBe("#0ca397");
+  expect(await colour("AA Mens")).toBe("#c54064");  // Men's before Mixed
+  expect(await colour("BB Mixed")).toBe("#de6129");
+});
+
+test("Home is a filled pill and Away an outline, in the list and the calendar", async ({ page }) => {
+  await open(page, "view=list");
+  const bg = (sel: string) => page.locator(sel).first().evaluate((n) => getComputedStyle(n).backgroundColor);
+  expect(await bg(".match:not(.is-past) .ha--H")).not.toBe("rgba(0, 0, 0, 0)");
+  expect(await bg(".match:not(.is-past) .ha--A")).toBe("rgba(0, 0, 0, 0)");
+  // Played matches keep the shape (filled vs outline), just in grey.
+  expect(await bg(".match.is-past .ha--H")).not.toBe("rgba(0, 0, 0, 0)");
+
+  await open(page, "view=calendar&month=2026-11");
+  await expect(page.locator(".cal-pill--H").first()).toBeVisible();
+  await expect(page.locator(".cal-pill--A").first()).toBeVisible();
+  expect(await bg(".cal-pill--A:not(.is-past)")).toBe("rgba(0, 0, 0, 0)");
+  // Played matches in the calendar keep the shapes too.
+  expect(await bg(".cal-pill--A.is-past")).toBe("rgba(0, 0, 0, 0)");
+  expect(await bg(".cal-pill--H.is-past")).not.toBe("rgba(0, 0, 0, 0)");
+  await expect(page.locator(".cal-legend")).toContainText("Home");
+  await expect(page.locator(".cal-legend")).toContainText("Away");
+});

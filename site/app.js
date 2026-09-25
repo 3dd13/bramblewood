@@ -6,9 +6,33 @@
   const DATA = JSON.parse(document.getElementById("fixtures-data").textContent);
   const $ = (id) => document.getElementById(id);
 
-  // Colours are assigned by team order in data/teams.yaml.
-  const PALETTE = ["#2563eb", "#a0522d", "#7c3aed", "#16a34a", "#ca8a04", "#0891b2", "#64748b", "#db2777", "#ea580c",
-                   "#4d7c0f", "#b91c1c", "#0f766e"];
+  // ── Team colours: one colour family per league ─────────────────────────
+  // Leagues take families in order of first appearance in data/teams.yaml; within a league,
+  // shades run Men's → Mixed → Ladies. Every shade reads as a dot (≥ 3:1) on light and dark
+  // surfaces, and shades within a family differ mostly by hue so they stay tellable apart.
+  // Home/Away is shown by shape (filled/outline), never by colour, so it can't clash with these.
+  const FAMILIES = [ // shade sets for a league with 1, 2 or 3 teams
+    { 1: ["#009c66"], 2: ["#2b8f22", "#0ca397"], 3: ["#2b8f22", "#009c66", "#0ca397"] }, // greens
+    { 1: ["#d24c49"], 2: ["#c54064", "#de6129"], 3: ["#be3e72", "#d6504c", "#da6900"] }, // reds
+    { 1: ["#0683df"], 2: ["#0882b0", "#5e84f2"], 3: ["#0681a1", "#0986e4", "#7480f3"] }, // blues
+    { 1: ["#a55bc5"], 2: ["#855bcd", "#c55fb9"], 3: ["#745dd0", "#a95ec8", "#cf5dac"] }, // purples
+  ];
+  // Only used if a league has more teams, or there are more leagues, than the families cover.
+  const FALLBACK = ["#64748b", "#b45309", "#0f766e", "#9f1239", "#4338ca", "#4d7c0f"];
+  const TYPE_ORDER = { "Men's": 0, Mixed: 1, Ladies: 2 };
+
+  function assignColours(teams) {
+    const leagues = [];
+    for (const t of teams) if (!leagues.includes(t.league)) leagues.push(t.league);
+    let spare = 0;
+    leagues.forEach((league, li) => {
+      const members = teams.filter((t) => t.league === league)
+        .map((t, i) => ({ t, i })) // stable: teams.yaml order breaks ties
+        .sort((a, b) => (TYPE_ORDER[a.t.type] ?? 9) - (TYPE_ORDER[b.t.type] ?? 9) || a.i - b.i);
+      const shades = FAMILIES[li]?.[members.length];
+      members.forEach(({ t }, i) => { t.color = shades ? shades[i] : FALLBACK[spare++ % FALLBACK.length]; });
+    });
+  }
 
   /** Tiny element builder: el("div", {class: "x", onclick: fn}, child, ...) */
   const el = (tag, attrs = {}, ...children) => {
@@ -44,7 +68,7 @@
     const VIEWS = ["overview", "list", "calendar"];
     const DEFAULT_VIEW = "overview";
     const { teams, fixtures, home } = DATA;
-    teams.forEach((t, i) => { t.color = PALETTE[i % PALETTE.length]; });
+    assignColours(teams);
     const teamByCode = new Map(teams.map((t) => [t.code, t]));
     const teamBySlug = new Map(teams.map((t) => [t.slug, t]));
     fixtures.forEach((f) => { f.teamObj = teamByCode.get(f.team); });
@@ -606,7 +630,7 @@
         } },
         el("span", { class: "cal-num" }, String(c.day)),
         items.length ? el("span", { class: "cal-pills" }, items.map((f) =>
-          el("span", { class: `cal-pill${F.isPast(f) ? " is-past" : ""}`, style: tc(f.teamObj) },
+          el("span", { class: `cal-pill cal-pill--${f.homeAway}${F.isPast(f) ? " is-past" : ""}`, style: tc(f.teamObj) },
             el("span", { class: "dot" }), el("span", { class: "pill-text" }, f.team),
             el("span", { class: "pill-ha" }, f.homeAway)))) : null);
     });
@@ -633,6 +657,8 @@
         el("div", { class: "cal-grid", role: "group", "aria-label": `${F.fmtMonth(key)} days` },
           ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => el("span", { class: "cal-dow", "aria-hidden": "true" }, d)),
           cells),
+        el("p", { class: "cal-legend", "aria-hidden": "true" },
+          el("span", { class: "lg lg--H" }), "Home", el("span", { class: "lg lg--A" }), "Away"),
         el("p", { class: "cal-hint" }, "Tap a day to see its matches.")),
       agenda);
   }
