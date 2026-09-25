@@ -11,6 +11,8 @@ checks them and builds `_site/`: one `index.html` with the data inlined as JSON,
 the static assets, and iCalendar feeds in `calendar/*.ics`. GitHub Actions
 deploys `_site/` to GitHub Pages on every push to `main`. Requirements are in
 `REQUIREMENTS.md`, and the non-technical editing guide is `EDITING.md`.
+The publishing decision and pipeline are in `DEPLOYMENT.md`, and the test
+strategy is in `TESTING.md` (proposed, not yet implemented).
 
 ## Sensitive data — read before changing anything
 
@@ -111,5 +113,7 @@ full build plus a browser check after editing `site/` or the build script.
 - **Don't push, create GitHub repos, enable Pages or deploy without explicit user approval.** The user decides when the site goes live.
 - Commit only when asked. Commit messages should describe *what changed in the fixtures* (e.g. "Move CR Mens v Horsham to 12 Nov") for data changes.
 - When importing or bulk-editing fixtures from the spreadsheet, follow the cell rules in `REQUIREMENTS.md` §6. List anything skipped or ambiguous (`?`, `TBC`, missing times) for the user instead of guessing.
+- **Never commit build output** (`_site/`) or create a `gh-pages` branch or `/docs` folder. Pages deploys from the CI artifact (`DEPLOYMENT.md` §1).
+- Don't implement the proposals in `DEPLOYMENT.md` §3 or `TESTING.md` until the user approves them.
 - Don't invent venue addresses. Leave them blank until the user provides a source.
-- Keep `README.md`, `REQUIREMENTS.md`, `EDITING.md` and this file in sync with behaviour changes.
+- Keep `README.md`, `REQUIREMENTS.md`, `EDITING.md`, `DEPLOYMENT.md`, `TESTING.md` and this file in sync with behaviour changes.

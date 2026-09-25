@@ -76,7 +76,8 @@ The home venue is **Brambletye School, Lewes Rd, East Grinstead RH19 3PD**.
 - **NFR-1 Privacy:** The public site must contain **no personal data** about members (see §7).
 - **NFR-2 Security:** No secrets in the repository. Deployment uses GitHub's built-in OIDC Pages token only.
 - **NFR-3 Cost:** Free to host and run (GitHub Pages + Actions).
-- **NFR-4 Simplicity:** No front-end framework, no Node toolchain. The only build dependency is Python 3 + PyYAML.
+- **NFR-4 Simplicity:** No front-end framework, no Node toolchain. The only build dependency is Python 3 + PyYAML. (Open question: allow Node as a *test-only* dependency for Playwright; see TESTING.md §4.4.)
+- **NFR-10 Release safety:** Built output is never committed. Pages deploys from the CI artifact of `main` (DEPLOYMENT.md). Automated tests must pass before deploying (TESTING.md).
 - **NFR-5 Responsive:** Usable at phone width (~360–400 px). On small screens the calendar shows coloured dots instead of labels.
 - **NFR-6 Theme:** Supports light and dark mode (`prefers-color-scheme`).
 - **NFR-7 Accessibility:** Semantic buttons with `aria-pressed`, labelled calendar cells, visible focus outlines, and colour never the only signal (the team code is always shown as text).

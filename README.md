@@ -14,6 +14,8 @@ a list and a calendar view, and subscribe to a calendar feed.
 |---|---|
 | [REQUIREMENTS.md](REQUIREMENTS.md) | What the site must do, and the constraints on it |
 | [EDITING.md](EDITING.md) | How club organisers add or change fixtures |
+| [DEPLOYMENT.md](DEPLOYMENT.md) | Publishing decision (build in CI, never commit `_site/`), pipeline, go-live checklist |
+| [TESTING.md](TESTING.md) | Test strategy incl. Playwright UI + screenshot tests (proposed) |
 | [AGENTS.md](AGENTS.md) | Guide for AI coding agents (Claude Code etc.) and developers |
 
 ## How it works
