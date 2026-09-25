@@ -267,3 +267,37 @@ test("no horizontal scrolling in any view (phone)", async ({ page }, info) => {
   await page.getByRole("button", { name: "Add to my calendar" }).click();
   await expectNoHorizontalOverflow(page);
 });
+
+test("league results links: team cards, selection card and footer", async ({ page }) => {
+  await open(page);
+  // Overview cards: league · division, and a results link that opens in a new tab.
+  const aa = card(page, "Alpha Men's");
+  await expect(aa.locator(".league")).toContainText("Test League North");
+  await expect(aa.locator(".league")).toContainText("Men's Div 1");
+  const aaLink = aa.getByRole("link", { name: /League table & results/ });
+  await expect(aaLink).toHaveAttribute("href", "https://example.org/north/mens-1");
+  await expect(aaLink).toHaveAttribute("target", "_blank");
+  await expect(aaLink).toHaveAttribute("rel", /noopener/);
+  await expect(card(page, "Charlie Ladies").getByRole("link", { name: /Latest results/ })).toHaveAttribute("href", "https://example.org/south/latest");
+  await expect(card(page, "Delta Combi").locator("a.ext-link")).toHaveCount(0);
+
+  // Footer: grouped by league, plus the club website.
+  const footer = page.locator(".site-footer");
+  await expect(footer.getByText("League results")).toBeVisible();
+  await expect(footer.getByRole("link", { name: /Men's Div 1/ })).toHaveAttribute("href", "https://example.org/north/mens-1");
+  await expect(footer.getByRole("link", { name: /Mixed Div 2/ })).toHaveAttribute("href", "https://example.org/north/mixed-2");
+  await expect(footer.getByRole("link", { name: /Latest results/ })).toHaveAttribute("href", "https://example.org/south/latest");
+  await expect(footer.getByRole("link", { name: /bramblewoodbadminton\.club/ })).toHaveAttribute("href", "https://www.bramblewoodbadminton.club/");
+
+  // Selection card: one team → its link; several → one link per team that has one.
+  await open(page, "view=list&teams=aa-mens");
+  await expect(page.locator(".sel-card").getByRole("link", { name: /League table & results/ })).toHaveAttribute("href", "https://example.org/north/mens-1");
+  await open(page, "view=list&teams=aa-mens,cc-ladies,dd-combi");
+  const multi = page.locator(".sel-card .sel-results-list a");
+  await expect(multi).toHaveCount(2);
+  await expect(multi.nth(0)).toContainText("AA Mens");
+  await expect(multi.nth(1)).toContainText("CC Ladies");
+  // All teams → no per-team links in the card (the footer lists them).
+  await open(page, "view=list");
+  await expect(page.locator(".sel-card a.ext-link")).toHaveCount(0);
+});

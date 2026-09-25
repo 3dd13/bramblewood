@@ -196,6 +196,7 @@
     chevron: '<path d="m6 9 6 6 6-6"/>',
     close: '<path d="M6 6l12 12M18 6 6 18"/>',
     info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
+    external: '<path d="M14 5h5v5"/><path d="M19 5l-8 8"/><path d="M18 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4"/>',
   };
   const icon = (name, cls = "ico") =>
     el("span", { class: cls, "aria-hidden": "true", html:
@@ -227,6 +228,15 @@
         f.address ? [" ", el("a", { href: F.mapUrl(f), target: "_blank", rel: "noopener",
           class: "map-link", "aria-label": `Open ${f.venueName || "venue"} in Google Maps` }, "Map")] : null));
   }
+  // League name plus division, e.g. "Crawley League · Men's 4 Div 1".
+  const leagueLine = (t) => seps("", [t.league, t.division || null]);
+  // Link to another site (league results, club website), opened in a new tab.
+  const extLink = (href, label, cls, srName) =>
+    el("a", { href, target: "_blank", rel: "noopener", class: `ext-link ${cls}` },
+      label, icon("external"), el("span", { class: "sr-only" }, ` (${srName || label}, opens in a new tab)`));
+  const resultsLink = (t, cls = "") => (t.resultsUrl
+    ? extLink(t.resultsUrl, t.division ? "League table & results" : "Latest results", cls, `${t.code} league results`)
+    : null);
   const selTeams = () => F.teams.filter((t) => F.state.teams.has(t.slug));
   const selectedTeam = () => (F.state.teams.size === 1 ? selTeams()[0] : null);
   const openFixtures = (slugs) => {
@@ -358,7 +368,8 @@
           el("div", { class: "team-card-title" },
             el("span", { class: "code-chip" }, el("span", { class: "dot", "aria-hidden": "true" }), t.code),
             el("h3", { id: `tc-${t.slug}` }, t.name),
-            el("p", { class: "league" }, t.league)),
+            el("p", { class: "league" }, leagueLine(t)),
+            resultsLink(t, "team-card-results")),
           el("span", { class: "shuttle-deco", "aria-hidden": "true", html:
             '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M24 38 14 12h20z"/><path d="M24 38 19 12M24 38l5-26"/><path d="M16 18h16"/><circle cx="24" cy="39" r="4.5" fill="currentColor"/></svg>' })),
         el("div", { class: "team-card-body" },
@@ -451,7 +462,8 @@
     const list = F.filtered();
     const played = list.filter(F.isPast).length;
     const title = team ? team.name : sel.length ? `${sel.length} teams: ${sel.map((t) => t.code).join(", ")}` : "All teams";
-    const leagues = team ? [team.league] : sel.length ? [...new Set(sel.map((t) => t.league))] : ["Every Bramblewood team"];
+    const leagues = team ? [leagueLine(team)] : sel.length ? [...new Set(sel.map((t) => t.league))] : ["Every Bramblewood team"];
+    const withResults = sel.filter((t) => t.resultsUrl);
     return el("section", { class: `sel-card${team ? " sel-card--team" : sel.length ? " sel-card--multi" : ""}`, style: team ? tc(team) : null,
       "aria-labelledby": "sel-h" },
       !team && sel.length ? el("div", { class: "sel-stripe", "aria-hidden": "true" },
@@ -462,7 +474,10 @@
                : el("span", { class: "code-chip code-chip--all" }, icon("users"), sel.length ? "Your selection" : "Club"),
           el("h2", { id: "sel-h", tabindex: "-1" }, title),
           el("p", { class: "sel-stats" }, seps("", [...leagues.map((l) => el("span", { class: "league" }, l)),
-            plural(list.length, "match"), played ? `${played} played` : null]))),
+            plural(list.length, "match"), played ? `${played} played` : null])),
+          team ? resultsLink(team, "sel-results")
+            : withResults.length ? el("p", { class: "sel-results-list" }, el("span", { class: "sel-results-label" }, "Results:"), " ",
+                seps("", withResults.map((t) => extLink(t.resultsUrl, t.code, "sel-results", `${t.code} league results`)))) : null),
         el("button", { type: "button", class: "btn btn--primary sel-cal", "data-k": "sel-cal", "aria-haspopup": "dialog",
           "aria-label": "Add to my calendar", onclick: () => openCalPanel(sel.length ? sel : F.teams, !sel.length) },
           icon("cal"), el("span", { class: "lbl-long", "aria-hidden": "true" }, "Add to my calendar"),
@@ -620,14 +635,37 @@
   }
 
   // ── Footer ────────────────────────────────────────────────────────────
+  const CLUB_URL = "https://www.bramblewoodbadminton.club/";
+  // One entry per league; teams sharing a results page (e.g. Tunbridge Wells) collapse into one link.
+  function leagueLinks() {
+    const byLeague = new Map();
+    for (const t of F.teams) {
+      if (!t.resultsUrl) continue;
+      if (!byLeague.has(t.league)) byLeague.set(t.league, new Map());
+      const urls = byLeague.get(t.league);
+      if (!urls.has(t.resultsUrl)) urls.set(t.resultsUrl, []);
+      urls.get(t.resultsUrl).push(t);
+    }
+    if (!byLeague.size) return null;
+    return el("div", { class: "foot-leagues" },
+      el("p", { class: "foot-h" }, "League results"),
+      el("ul", { class: "foot-league-list" }, [...byLeague].map(([league, urls]) =>
+        el("li", {}, el("span", { class: "foot-league" }, league), " ",
+          seps("", [...urls].map(([url, ts]) => {
+            const divs = ts.map((t) => t.division).filter(Boolean);
+            return extLink(url, divs.length ? divs.join(" / ") : "Latest results", "foot-link", `${league} ${divs.join(" / ") || "latest results"}`);
+          }))))));
+  }
   $("footer").replaceChildren(
     el("div", {},
       el("p", { class: "foot-h" }, "Home venue"),
       el("p", {}, el("strong", {}, F.home.name), el("br"), F.home.address, " ",
         el("a", { href: F.mapUrl({ venueName: F.home.name, address: F.home.address }), target: "_blank", rel: "noopener",
           class: "map-link", "aria-label": `Open ${F.home.name} in Google Maps` }, "Map"))),
+    leagueLinks(),
     el("div", {},
       el("p", { class: "foot-h" }, "Bramblewood Badminton Club"),
+      el("p", {}, extLink(CLUB_URL, "bramblewoodbadminton.club", "foot-link", "Club website")),
       el("p", {}, seps("", [F.season ? `${F.season} season` : null,
         ["Last updated ", el("time", { datetime: F.data.generated }, F.lastUpdated)]]))));
   document.querySelectorAll("[data-season]").forEach((n) => { n.textContent = F.season; n.hidden = !F.season; });

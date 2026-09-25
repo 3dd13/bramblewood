@@ -320,3 +320,27 @@ def test_invalid_venue_entries_are_rejected(data_dir, clubs, message):
     res = run_build(data_dir, check=True)
     assert res.returncode == 1
     assert message in res.stderr
+
+
+# ── Team fields: division + results_url ────────────────────────────────────
+
+def test_team_division_and_results_url_are_output(built_site):
+    teams = {t["code"]: t for t in json.loads((built_site / "fixtures.json").read_text())["teams"]}
+    assert teams["AA Mens"]["division"] == "Men's Div 1"
+    assert teams["AA Mens"]["resultsUrl"] == "https://example.org/north/mens-1"
+    assert teams["DD Combi"]["resultsUrl"] == "" and teams["DD Combi"]["division"] == ""
+
+
+@pytest.mark.parametrize("line,message", [
+    ("  results_url: http://example.org/insecure", "results_url must be a full https:// link"),
+    ("  results_url: example.org/no-scheme", "results_url must be a full https:// link"),
+    ("  results_url: javascript:alert(1)", "results_url must be a full https:// link"),
+    ("  resuts_url: https://example.org/typo", "Unknown field(s) resuts_url"),
+])
+def test_invalid_team_fields_are_rejected(data_dir, line, message):
+    text = (data_dir / "teams.yaml").read_text(encoding="utf-8")
+    text = text.replace("- code: DD Combi\n", f"- code: DD Combi\n{line}\n", 1)
+    (data_dir / "teams.yaml").write_text(text, encoding="utf-8")
+    res = run_build(data_dir, check=True)
+    assert res.returncode == 1
+    assert message in res.stderr and "teams.yaml:" in res.stderr

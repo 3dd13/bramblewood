@@ -56,6 +56,11 @@ The home venue is **Brambletye School, Lewes Rd, East Grinstead RH19 3PD**.
 - **FR-12:** Store the page, filters, view, month (calendar only) and selected day in the URL so they can be shared, e.g. `?view=calendar&teams=cr-mens&month=2026-11&day=2026-11-19`. Invalid or out-of-season values are ignored or clamped.
 - **FR-12a:** A light/dark switch. It follows the system setting until used, then remembers the choice in the browser, with no flash of the wrong theme.
 
+### 4.3a League results and club links
+- **FR-12b:** Each team can link to its league's official results/table page (`results_url`, shown as "League table & results", or "Latest results" when no division is set). The link appears on the team's Overview card, on the Fixtures selection card (one link per selected team), and in a footer "League results" index grouped by league. Teams sharing a page (e.g. Tunbridge Wells) share one footer link.
+- **FR-12c:** The footer links to the club website, https://www.bramblewoodbadminton.club/.
+- **FR-12d:** External links open in a new tab (`rel="noopener"`), show an external-link icon, and tell screen readers they open in a new tab. `results_url` must be `https://` (checked by the build).
+
 ### 4.4 Venues
 - **FR-13:** Home matches use the home venue. Away matches use the opponent club's venue from `data/venues.yaml`, looked up by club name without the team letter ("Felbridge B" → "Felbridge"). A club can have a different venue per league (`leagues:`), because some clubs host different leagues at different halls.
 - **FR-14:** Allow an individual match to override its address.

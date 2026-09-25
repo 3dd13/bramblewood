@@ -19,6 +19,7 @@ import re
 import shutil
 import sys
 from pathlib import Path
+from urllib.parse import urlparse
 
 import yaml
 
@@ -91,6 +92,14 @@ def slug(text):
 
 # ── Validation ─────────────────────────────────────────────────────────────
 
+TEAM_FIELDS = {"code", "name", "league", "type", "division", "results_url"}
+
+
+def valid_https_url(url):
+    parts = urlparse(url)
+    return parts.scheme == "https" and bool(parts.netloc) and " " not in url
+
+
 def read_teams():
     node = load("teams.yaml")
     if node is None:
@@ -109,12 +118,21 @@ def read_teams():
         if code in seen:
             error("teams.yaml", line, f"Duplicate team code '{code}'")
         seen.add(code)
+        extra = set(t) - TEAM_FIELDS
+        if extra:
+            error("teams.yaml", line, f"Unknown field(s) {', '.join(sorted(extra))} (allowed: {', '.join(sorted(TEAM_FIELDS))})")
+        url = t.get("results_url", "")
+        if url and not valid_https_url(url):
+            error("teams.yaml", line, f"results_url must be a full https:// link, got '{url}'")
+            url = ""
         teams.append({
             "code": code,
             "slug": slug(code),
             "name": t.get("name") or code,
             "league": t.get("league", ""),
             "type": t.get("type", ""),
+            "division": t.get("division", ""),
+            "resultsUrl": url,
         })
     return teams
 

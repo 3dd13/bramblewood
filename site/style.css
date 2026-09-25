@@ -213,6 +213,16 @@ html.scroll-lock, html.scroll-lock body { overflow: hidden; }
 .btn--ghost:hover { border-color: color-mix(in srgb, var(--tc) 50%, var(--line)); }
 .icon-btn { width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid var(--line); background: var(--surface); display: grid; place-items: center; }
 .icon-btn:disabled { color: var(--muted); background: var(--surface-2); border-style: dashed; cursor: not-allowed; }
+/* Links to external sites (league results, club website): underlined, with an arrow icon. */
+.ext-link { color: var(--brand-ink); font-weight: 750; text-underline-offset: 3px; white-space: nowrap; }
+.ext-link .ico { display: inline-block; width: 0.95em; height: 0.95em; margin-left: 3px; vertical-align: -0.1em; }
+.team-card-results, .sel-results { display: inline-block; font-size: 0.88rem; margin-top: 6px; }
+.sel-results-list .ext-link { display: inline; margin: 0; }
+.sel-results-list { display: flex; align-items: baseline; gap: 0 6px; }
+.sel-results-list .seps { flex: 1; }
+.team-card-results { color: var(--tc-ink); }
+.sel-results-list { margin-top: 6px; font-size: 0.88rem; font-weight: 650; color: var(--muted); }
+.sel-results-list .sel-results { margin-top: 0; }
 .link-btn { background: none; border: 0; color: var(--brand-ink); font-weight: 800; padding: 4px 2px; text-decoration: underline; text-underline-offset: 3px; }
 
 /* ── Tab bar ── */
@@ -487,6 +497,8 @@ main { padding-block: 28px 56px; outline: none; }
 .site-footer { border-top: 1px solid var(--line); background: var(--bg-tint); color: var(--muted); font-size: 0.92rem; }
 .footer-inner { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 18px 40px; padding-block: 26px 34px; }
 .foot-h { font-weight: 850; color: var(--ink); margin-bottom: 4px; }
+.foot-league-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.foot-league { font-weight: 700; color: var(--ink); }
 .site-footer strong { color: var(--ink); }
 
 /* ── Responsive ── */
@@ -533,6 +545,11 @@ main { padding-block: 28px 56px; outline: none; }
   .icon-btn { flex: none; min-width: 44px; }
   .seg button { min-width: 44px; justify-content: center; }
   .link-btn { min-height: 44px; }
+  /* Bigger tap area without changing the layout (inline padding doesn't move the line). */
+  .ext-link { padding-block: 14px; margin-block: -14px; }
+  .team-card-results, .sel-results { margin-top: -8px; }
+  .sel-results-list { margin-top: 6px; }
+  .foot-league-list { gap: 0; }
   /* Several teams: the long title gets the full width, the button goes below. */
   .sel-card--multi .sel-top, .sel-card:not(.sel-card--team) .sel-top { flex-wrap: wrap; }
   .club-cal { padding: 18px 16px; }

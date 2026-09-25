@@ -1,47 +1,69 @@
 # Bramblewood teams for the current season.
 # `code` is what you type in fixtures.yaml. Colours are assigned by the order below.
+#
+# Optional:
+#   division:    the division name as the league writes it (shown after the league name)
+#   results_url: the league's results/table page for this team's division (https:// only)
 
 - code: WW Mens
   name: West Weald Men's
   league: West Weald League
   type: Men's
+  division: Open Div 1
+  results_url: https://localleagues.uk/submit_fixtures.php?leagueID=23&div=1
 
 - code: CR Mens
   name: Crawley Men's
   league: Crawley League
   type: Men's
+  division: Men's 4 Div 1
+  results_url: https://localleagues.uk/submit_fixtures.php?leagueID=15&div=1
 
 - code: TW Mens 6
   name: Tunbridge Wells Men's 6
   league: Tunbridge Wells League
   type: Men's
+  # The league's per-division result pages aren't ready yet; update when they are.
+  results_url: https://twbl.co.uk/Latest-Results/
 
 - code: TW Mixed 6
   name: Tunbridge Wells Mixed 6
   league: Tunbridge Wells League
   type: Mixed
+  # The league's per-division result pages aren't ready yet; update when they are.
+  results_url: https://twbl.co.uk/Latest-Results/
 
 - code: CR Mixed
   name: Crawley Mixed
   league: Crawley League
   type: Mixed
+  division: Mixed 4 Div 1
+  results_url: https://localleagues.uk/submit_fixtures.php?leagueID=17&div=1
 
 - code: WW Combi
   name: West Weald Combi
   league: West Weald League
   type: Mixed
+  division: Combi Div 1
+  results_url: https://localleagues.uk/submit_fixtures.php?leagueID=4&div=1
 
 - code: MS Combi
-  name: Mid Sussex Mixed Combi Div 2
+  name: Mid Sussex Mixed Combi
   league: Mid Sussex League
   type: Mixed
+  division: Mixed Combi Div 1
+  results_url: https://www.midsussexbadminton.org.uk/league-tables/mixed-combi-div-1/
 
 - code: MS Ladies
   name: Mid Sussex Ladies
   league: Mid Sussex League
   type: Ladies
+  division: Ladies Combi Div 1
+  results_url: https://www.midsussexbadminton.org.uk/league-tables/ladies-combi-div-1/
 
 - code: WW Ladies
   name: West Weald Ladies
   league: West Weald League
   type: Ladies
+  division: Ladies Div 1
+  results_url: https://localleagues.uk/submit_fixtures.php?leagueID=3&div=1

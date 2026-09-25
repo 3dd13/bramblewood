@@ -88,7 +88,7 @@ itself stays plain HTML/CSS/JS built by Python.
 | Path | Purpose |
 |---|---|
 | `data/fixtures.yaml` | One entry per match. The master copy of fixtures. |
-| `data/teams.yaml` | Team `code` (used in fixtures), display `name`, `league`, `type`. List order decides team colour order. |
+| `data/teams.yaml` | Team `code` (used in fixtures), display `name`, `league`, `type`, optional `division` and `results_url` (https only; the league's results/table page). List order decides team colour order. |
 | `data/venues.yaml` | `home` venue plus `clubs:` mapping club name → `{name, address, leagues?}`. `leagues:` (keyed by the `league` in teams.yaml) gives a club a different venue in that league. |
 | `scripts/build.py` | Loads YAML **as strings** via `yaml.compose` (no implicit date/number conversion, and keeps line numbers), checks it, writes `_site/`. `--data`/`--out` options; `SOURCE_DATE_EPOCH` for reproducible builds. |
 | `scripts/privacy_check.py` | Fails on committed secrets or exports, emails, phones, personal-data fields, or blocklisted names. Never prints what it matched. |

@@ -40,6 +40,7 @@ Indentation matters: every line after `- date:` starts with two spaces.
 | Opponent venue address       | Fill in `name`/`address` for the club in `data/venues.yaml` |
 | Club plays elsewhere in one league | Add a `leagues:` entry for that club in `data/venues.yaml` (see the example at the top of that file) |
 | New team / new season        | Add the team to `data/teams.yaml`                           |
+| League results link / division | Set `results_url` (a full `https://` link) and `division` for the team in `data/teams.yaml` |
 
 The calendar feeds (`.ics`) update with every deploy. Subscribed calendars pick
 up changes the next time they refresh, which can take from a few hours up to a
