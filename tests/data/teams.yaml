@@ -1,4 +1,10 @@
-# FICTIONAL test data for UI tests (TESTING.md §4.3). Never put real people here.
+# FICTIONAL test data for UI tests (TESTING.md §3). Never put real people here.
+# Deliberately NOT in alphabetical order: the UI must sort the team filter by code.
+- code: DD Combi
+  name: Delta Combi
+  league: Test League South
+  type: Mixed
+
 - code: AA Mens
   name: Alpha Men's
   league: Test League North
@@ -6,20 +12,15 @@
   division: Men's Div 1
   results_url: https://example.org/north/mens-1
 
-- code: BB Mixed
-  name: Bravo Mixed
-  league: Test League North
-  type: Mixed
-  division: Mixed Div 2
-  results_url: https://example.org/north/mixed-2
-
 - code: CC Ladies
   name: Charlie Ladies
   league: Test League South
   type: Ladies
   results_url: https://example.org/south/latest
 
-- code: DD Combi
-  name: Delta Combi
-  league: Test League South
+- code: BB Mixed
+  name: Bravo Mixed
+  league: Test League North
   type: Mixed
+  division: Mixed Div 2
+  results_url: https://example.org/north/mixed-2

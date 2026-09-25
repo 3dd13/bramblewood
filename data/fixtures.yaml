@@ -392,6 +392,11 @@
   home_away: H
   opponent: Forest B
   time: "20:00"
+- date: 2027-04-08
+  team: MS Combi
+  home_away: A
+  opponent: Hassocks
+  time: "20:00"
 - date: 2027-04-09
   team: TW Mixed 6
   home_away: H
@@ -412,6 +417,12 @@
   home_away: A
   opponent: AIT B
   time: "19:30"
+- date: 2027-04-23
+  team: MS Combi
+  home_away: H
+  opponent: Brighton A
+  time: "20:00"
+  notes: Rearranged from 30 Apr
 - date: 2027-04-28
   team: WW Mens
   home_away: A
@@ -421,11 +432,6 @@
   team: CR Mixed
   home_away: H
   opponent: Forest
-  time: "20:00"
-- date: 2027-04-30
-  team: MS Combi
-  home_away: H
-  opponent: Brighton A
   time: "20:00"
 
 # ── May 2027 ────────────────────────────────

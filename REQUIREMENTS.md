@@ -50,7 +50,7 @@ The home venue is **Brambletye School, Lewes Rd, East Grinstead RH19 3PD**.
 - **FR-6:** The **list view** groups matches by month, in date order, as a timeline.
 - **FR-7:** The **calendar view** shows a Monday-first month grid with previous/next navigation, limited to the season's months. Clicking a day shows that day's matches ("Show whole month" resets). The selected day looks different from the next-match day. On phones, days show coloured dots and the matches are listed below the grid.
 - **FR-8:** Provide a "Jump to it" link to the next match.
-- **FR-9:** Filter by one or more teams, using a single team control.
+- **FR-9:** Filter by one or more teams, using a single team control. The team toggles (and the list of selected teams) are sorted alphabetically by team code; colours and the Overview card order follow `teams.yaml`.
 - **FR-10:** Filter by Home / Away / All.
 - **FR-11:** Optionally hide past matches.
 - **FR-12:** Store the page, filters, view, month (calendar only) and selected day in the URL so they can be shared, e.g. `?view=calendar&teams=cr-mens&month=2026-11&day=2026-11-19`. Invalid or out-of-season values are ignored or clamped.

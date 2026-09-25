@@ -237,7 +237,10 @@
   const resultsLink = (t, cls = "") => (t.resultsUrl
     ? extLink(t.resultsUrl, t.division ? "League table & results" : "Latest results", cls, `${t.code} league results`)
     : null);
-  const selTeams = () => F.teams.filter((t) => F.state.teams.has(t.slug));
+  // Team filter order: alphabetical by code ("CR Mens", "CR Mixed", …). Colours still follow teams.yaml order.
+  const byCode = (a, b) => a.code.localeCompare(b.code, "en-GB", { numeric: true, sensitivity: "base" });
+  const teamsByCode = () => [...F.teams].sort(byCode);
+  const selTeams = () => teamsByCode().filter((t) => F.state.teams.has(t.slug));
   const selectedTeam = () => (F.state.teams.size === 1 ? selTeams()[0] : null);
   const openFixtures = (slugs) => {
     pendingFocus = "#sel-h";
@@ -308,7 +311,7 @@
           el("button", { type: "button", class: "tteam tteam--all", "data-k": "tt-all", "aria-pressed": String(none),
             onclick: () => F.set({ teams: new Set(), day: null }) }, icon("users"), "All teams"),
           el("span", { class: "tab-sep", "aria-hidden": "true" })),
-        F.teams.map((t) => el("button", { type: "button", class: "tteam", style: tc(t), "data-k": `tt-${t.slug}`,
+        teamsByCode().map((t) => el("button", { type: "button", class: "tteam", style: tc(t), "data-k": `tt-${t.slug}`,
           "aria-pressed": String(F.state.teams.has(t.slug)), title: t.name,
           onclick: () => { revealChip = `tt-${t.slug}`; F.state.day = null; F.toggleTeam(t.slug); } },
           el("span", { class: "tick", "aria-hidden": "true" }, el("span", { class: "dot" }), icon("check")), t.code)));

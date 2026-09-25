@@ -301,3 +301,11 @@ test("league results links: team cards, selection card and footer", async ({ pag
   await open(page, "view=list");
   await expect(page.locator(".sel-card a.ext-link")).toHaveCount(0);
 });
+
+test("team filter is alphabetical regardless of teams.yaml order", async ({ page }) => {
+  await open(page, "view=list&teams=dd-combi,aa-mens");
+  const chips = page.locator(".teambar .tteam");
+  await expect(chips).toHaveText(["All teams", "AA Mens", "BB Mixed", "CC Ladies", "DD Combi"]);
+  // The selection title and results links follow the same order.
+  await expect(page.locator("#sel-h")).toHaveText("2 teams: AA Mens, DD Combi");
+});
