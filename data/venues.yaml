@@ -58,9 +58,10 @@ clubs:
     name: The Bridge Leisure Centre
     address: Wickhurst Lane, Broadbridge Heath, Horsham RH12 3YS
   Oakwood:
-    # The league lists Oakwood's 2026/27 home venue as "TBC"; fill in once confirmed.
-    name: ""
-    address: ""
+    # Confirmed by the club organiser. The centre's own site gives Smallfield Road
+    # RH6 9AU (the school's RH6 9AE postcode sends sat-navs to the wrong entrance).
+    name: Oakwood Sports Centre
+    address: Smallfield Road, Horley RH6 9AU
   Shuttlers:
     name: Hugh Christie School
     address: White Cottage Road, Tonbridge TN10 4PU
