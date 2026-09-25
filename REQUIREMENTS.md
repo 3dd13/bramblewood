@@ -57,7 +57,7 @@ The home venue is **Brambletye School, Lewes Rd, East Grinstead RH19 3PD**.
 - **FR-12a:** A light/dark switch. It follows the system setting until used, then remembers the choice in the browser, with no flash of the wrong theme.
 
 ### 4.4 Venues
-- **FR-13:** Home matches use the home venue. Away matches use the opponent club's venue from `data/venues.yaml`, looked up by club name without the team letter ("Felbridge B" → "Felbridge").
+- **FR-13:** Home matches use the home venue. Away matches use the opponent club's venue from `data/venues.yaml`, looked up by club name without the team letter ("Felbridge B" → "Felbridge"). A club can have a different venue per league (`leagues:`), because some clubs host different leagues at different halls.
 - **FR-14:** Allow an individual match to override its address.
 - **FR-15:** Show a Google Maps link wherever an address is known.
 

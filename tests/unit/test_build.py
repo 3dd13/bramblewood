@@ -254,3 +254,69 @@ def test_uids_are_stable_across_builds(tmp_path):
         assert run_build(TEST_DATA, tmp_path / name, env={"SOURCE_DATE_EPOCH": "1800000000" if name == "y" else EPOCH}).returncode == 0
         uids.append(sorted(str(e["UID"]) for e in events(load_cal(tmp_path / name / "calendar" / "all.ics"))))
     assert uids[0] == uids[1]
+
+
+# ── Per-league venues ──────────────────────────────────────────────────────
+
+def set_venues(data_dir, clubs_yaml):
+    text = (data_dir / "venues.yaml").read_text(encoding="utf-8")
+    head = text[: text.index("clubs:")]
+    (data_dir / "venues.yaml").write_text(head + "clubs:\n" + clubs_yaml, encoding="utf-8")
+
+
+BASE_CLUBS = """  Riverside:
+    name: Riverside Leisure Centre
+    address: 2 River Lane, Rivertown RT2 2BB
+  Meadow:
+    name: Meadow Hall
+    address: 4 Meadow Way, Fieldham FH4 4DD
+  Oakfield:
+    name: ""
+    address: ""
+"""
+
+
+def test_club_uses_its_league_specific_venue(data_dir, tmp_path):
+    # Hilltop hosts AA Mens (Test League North) and CC Ladies (South) at different venues.
+    set_venues(data_dir, BASE_CLUBS + """  Hilltop:
+    name: Hilltop School
+    address: 3 Hill Street, Hillville HV3 3CC
+    leagues:
+      Test League North:
+        name: Hilltop Sports Centre
+        address: 9 Summit Road, Hillville HV3 9ZZ
+""")
+    res = run_build(data_dir, tmp_path / "out")
+    assert res.returncode == 0, res.stderr
+    fx = {f["id"]: f for f in json.loads((tmp_path / "out" / "fixtures.json").read_text())["fixtures"]}
+    north = fx["2026-11-17-aa-mens-hilltop"]            # AA Mens, Test League North, away
+    assert (north["venueName"], north["address"]) == ("Hilltop Sports Centre", "9 Summit Road, Hillville HV3 9ZZ")
+    bravo = fx["2026-10-16-bb-mixed-hilltop"]            # BB Mixed is also North
+    assert bravo["venueName"] == "Hilltop Sports Centre"
+
+
+def test_league_override_falls_back_to_club_venue(data_dir, tmp_path):
+    set_venues(data_dir, BASE_CLUBS + """  Hilltop:
+    name: Hilltop School
+    address: 3 Hill Street, Hillville HV3 3CC
+    leagues:
+      Test League South:
+        name: Hilltop Annexe
+        address: 1 Annexe Row, Hillville HV3 1AA
+""")
+    res = run_build(data_dir, tmp_path / "out")
+    assert res.returncode == 0, res.stderr
+    fx = {f["id"]: f for f in json.loads((tmp_path / "out" / "fixtures.json").read_text())["fixtures"]}
+    assert fx["2026-11-17-aa-mens-hilltop"]["venueName"] == "Hilltop School"   # North → default
+
+
+@pytest.mark.parametrize("clubs,message", [
+    ("  Hilltop:\n    name: X\n    address: Y\n    leagues:\n      No Such League:\n        name: Z\n        address: W\n", "unknown league 'No Such League'"),
+    ("  Hilltop:\n    name: X\n    adress: Y\n", "unknown field(s) adress"),
+    ("  Hilltop: Hilltop School\n", "must have `name:` and `address:` lines"),
+])
+def test_invalid_venue_entries_are_rejected(data_dir, clubs, message):
+    set_venues(data_dir, BASE_CLUBS + clubs)
+    res = run_build(data_dir, check=True)
+    assert res.returncode == 1
+    assert message in res.stderr

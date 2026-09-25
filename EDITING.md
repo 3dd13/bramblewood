@@ -38,6 +38,7 @@ Indentation matters: every line after `- date:` starts with two spaces.
 | One-off different venue      | Add `address: Some Hall, Street, Town AB1 2CD` to the match |
 | New opponent club            | Add it under `clubs:` in `data/venues.yaml` first           |
 | Opponent venue address       | Fill in `name`/`address` for the club in `data/venues.yaml` |
+| Club plays elsewhere in one league | Add a `leagues:` entry for that club in `data/venues.yaml` (see the example at the top of that file) |
 | New team / new season        | Add the team to `data/teams.yaml`                           |
 
 The calendar feeds (`.ics`) update with every deploy. Subscribed calendars pick

@@ -131,7 +131,25 @@ def read_venues():
     if not isinstance(clubs, dict):
         error("venues.yaml", 1, "`clubs` must be a mapping of club name -> venue")
         clubs = {}
+    for name, venue in clubs.items():
+        if not isinstance(venue, dict):
+            error("venues.yaml", 1, f"Club '{name}' must have `name:` and `address:` lines")
+            clubs[name] = {}
+            continue
+        extra = set(venue) - {"name", "address", "leagues"}
+        if extra:
+            error("venues.yaml", 1, f"Club '{name}': unknown field(s) {', '.join(sorted(extra))} (allowed: name, address, leagues)")
+        leagues = venue.get("leagues") or {}
+        if not isinstance(leagues, dict) or any(not isinstance(x, dict) for x in leagues.values()):
+            error("venues.yaml", 1, f"Club '{name}': `leagues:` must map a league name to its own `name:`/`address:`")
+            venue["leagues"] = {}
     return home, clubs
+
+
+def venue_for(club, league, clubs):
+    """A club's venue, using its per-league venue when it plays elsewhere in that league."""
+    venue = clubs.get(club) or {}
+    return (venue.get("leagues") or {}).get(league) or venue
 
 
 FIELDS = {"date", "team", "home_away", "opponent", "time", "notes", "address"}
@@ -146,6 +164,12 @@ def read_fixtures(teams, home, clubs):
         error("fixtures.yaml", 1, "Expected a list of matches (each starting with '- date:')")
         return []
     team_codes = {t["code"] for t in teams}
+    team_league = {t["code"]: t["league"] for t in teams}
+    leagues = set(team_league.values())
+    for name, venue in clubs.items():
+        for lg in (venue.get("leagues") or {}):
+            if lg not in leagues:
+                error("venues.yaml", 1, f"Club '{name}': unknown league '{lg}' (leagues in teams.yaml: {', '.join(sorted(leagues))})")
     fixtures, seen = [], {}
     for n in node.value:
         line = n.start_mark.line + 1
@@ -201,7 +225,7 @@ def read_fixtures(teams, home, clubs):
             error("fixtures.yaml", line, f"{f['team']} already has a match on {date} (line {seen[key]})")
         seen[key] = line
 
-        venue = home if ha == "H" else (clubs.get(club) or {})
+        venue = home if ha == "H" else venue_for(club, team_league[f["team"]], clubs)
         address = f.get("address") or venue.get("address", "")
         fixtures.append({
             "id": f"{date.isoformat()}-{slug(f['team'])}-{slug(f['opponent'])}",

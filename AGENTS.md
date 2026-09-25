@@ -89,7 +89,7 @@ itself stays plain HTML/CSS/JS built by Python.
 |---|---|
 | `data/fixtures.yaml` | One entry per match. The master copy of fixtures. |
 | `data/teams.yaml` | Team `code` (used in fixtures), display `name`, `league`, `type`. List order decides team colour order. |
-| `data/venues.yaml` | `home` venue plus `clubs:` mapping club name → `{name, address}`. |
+| `data/venues.yaml` | `home` venue plus `clubs:` mapping club name → `{name, address, leagues?}`. `leagues:` (keyed by the `league` in teams.yaml) gives a club a different venue in that league. |
 | `scripts/build.py` | Loads YAML **as strings** via `yaml.compose` (no implicit date/number conversion, and keeps line numbers), checks it, writes `_site/`. `--data`/`--out` options; `SOURCE_DATE_EPOCH` for reproducible builds. |
 | `scripts/privacy_check.py` | Fails on committed secrets or exports, emails, phones, personal-data fields, or blocklisted names. Never prints what it matched. |
 | `site/index.html` | Page shell. `__FIXTURES_JSON__` is replaced at build time; the `<head>` script applies the saved theme before first paint. |
@@ -143,5 +143,5 @@ itself stays plain HTML/CSS/JS built by Python.
 - When importing or bulk-editing fixtures from the spreadsheet, follow the cell rules in `REQUIREMENTS.md` §6. List anything skipped or ambiguous (`?`, `TBC`, missing times) for the user instead of guessing.
 - **Never commit build output** (`_site/`) or create a `gh-pages` branch or `/docs` folder. Pages deploys from the CI artifact (`DEPLOYMENT.md` §1).
 - Prototype or scratch work goes in the session scratchpad or a git-ignored folder, never in tracked paths.
-- Don't invent venue addresses. Leave them blank until the user provides a source.
+- Don't invent venue addresses. Leave them blank until there's a source (league fixture pages for the venue name, the venue's own or operator's site for the address), and record the sources in the commit/PR.
 - Keep `README.md`, `REQUIREMENTS.md`, `EDITING.md`, `DEPLOYMENT.md`, `TESTING.md` and this file in sync with behaviour changes.

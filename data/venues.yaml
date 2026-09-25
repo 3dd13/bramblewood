@@ -5,54 +5,68 @@
 #        written in fixtures.yaml without its team letter, so "Felbridge A"
 #        and "Felbridge B" both use the "Felbridge" entry.
 #        Leave `address` blank if unknown; the site just won't show a map link.
+#        If a club plays at a different venue in one league, add it under
+#        `leagues:` using the league name from teams.yaml, e.g.
+#          Example Club:
+#            name: Example Club Hall
+#            address: ...
+#            leagues:
+#              Crawley League:
+#                name: Example Leisure Centre
+#                address: ...
 
 home:
   name: Brambletye School
   address: Lewes Rd, East Grinstead RH19 3PD
 
 clubs:
+  # Sources (checked 2026-09-25): venue names from the 2026/27 localleagues.uk
+  # fixture pages (Crawley, West Weald), the Mid Sussex association's club list
+  # and the Tunbridge Wells league venue list for 2025/26; addresses from each
+  # venue's own site or the government schools register.
   AIT:
-    name: ""
-    address: ""
+    name: Mascalls Academy
+    address: Maidstone Road, Paddock Wood, Tonbridge TN12 6LT
   Angel:
-    name: ""
-    address: ""
+    name: Angel Centre
+    address: Angel Lane, Tonbridge TN9 1SF
   BATS:
-    name: ""
-    address: ""
+    name: BACA (Brighton Aldridge Community Academy)
+    address: Lewes Road, Brighton BN1 9PW
   Brighton:
-    name: ""
-    address: ""
+    name: University of Sussex Sport Centre
+    address: Falmer, Brighton BN1 9RB
   BSMS:
-    name: ""
-    address: ""
+    name: University of Sussex Sport Centre
+    address: Falmer, Brighton BN1 9RB
   Chanctonbury:
-    name: ""
-    address: ""
+    name: Chanctonbury Leisure Centre
+    address: Spierbridge Road, Storrington RH20 4PG
   Crawley:
-    name: ""
-    address: ""
+    name: St Wilfrid's Catholic School
+    address: St Wilfrid's Way, Crawley RH11 8PG
   Felbridge:
-    name: ""
-    address: ""
+    name: East Grinstead Sports Club
+    address: Saint Hill Road, East Grinstead RH19 4JU
   Forest:
-    name: ""
-    address: ""
+    name: Tanbridge House School
+    address: Farthings Hill, Guildford Road, Horsham RH12 1SR
   Hassocks:
-    name: ""
-    address: ""
+    name: Henfield Leisure Centre
+    address: 7 Northcroft, Henfield BN5 9QB
   Horsham:
-    name: ""
-    address: ""
+    name: The Bridge Leisure Centre
+    address: Wickhurst Lane, Broadbridge Heath, Horsham RH12 3YS
   Oakwood:
+    # The league lists Oakwood's 2026/27 home venue as "TBC"; fill in once confirmed.
     name: ""
     address: ""
   Shuttlers:
-    name: ""
-    address: ""
+    name: Hugh Christie School
+    address: White Cottage Road, Tonbridge TN10 4PU
   Tornados:
-    name: ""
-    address: ""
+    name: Triangle Leisure Centre
+    address: Triangle Way, Burgess Hill RH15 8WA
   Trident:
-    name: ""
-    address: ""
+    name: Holmewood House School
+    address: Barrow Lane, Langton Green, Tunbridge Wells TN3 0EB
