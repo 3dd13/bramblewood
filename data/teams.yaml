@@ -1,0 +1,47 @@
+# Bramblewood teams for the current season.
+# `code` is what you type in fixtures.yaml. Colours are assigned by the order below.
+
+- code: WW Mens
+  name: WW Men's
+  league: WW League
+  type: Men's
+
+- code: CR Mens
+  name: Crawley Men's
+  league: Crawley League
+  type: Men's
+
+- code: TW Mens 6
+  name: Tunbridge Wells Men's 6
+  league: Tunbridge Wells League
+  type: Men's
+
+- code: TW Mixed 6
+  name: Tunbridge Wells Mixed 6
+  league: Tunbridge Wells League
+  type: Mixed
+
+- code: CR Mixed
+  name: Crawley Mixed
+  league: Crawley League
+  type: Mixed
+
+- code: WW Combi
+  name: WW Combi
+  league: WW League
+  type: Mixed
+
+- code: MS Combi
+  name: Mid Sussex Mixed Combi Div 2
+  league: Mid Sussex League
+  type: Mixed
+
+- code: MS Ladies
+  name: Mid Sussex Ladies
+  league: Mid Sussex League
+  type: Ladies
+
+- code: WW Ladies
+  name: WW Ladies
+  league: WW League
+  type: Ladies

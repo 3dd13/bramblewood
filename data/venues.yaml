@@ -1,0 +1,58 @@
+# Where matches are played.
+#
+# home:  Bramblewood's own venue (used for every H match).
+# clubs: opponent venues (used for A matches). The key is the club name as
+#        written in fixtures.yaml without its team letter, so "Felbridge A"
+#        and "Felbridge B" both use the "Felbridge" entry.
+#        Leave `address` blank if unknown; the site just won't show a map link.
+
+home:
+  name: Brambletye School
+  address: Lewes Rd, East Grinstead RH19 3PD
+
+clubs:
+  AIT:
+    name: ""
+    address: ""
+  Angel:
+    name: ""
+    address: ""
+  BATS:
+    name: ""
+    address: ""
+  Brighton:
+    name: ""
+    address: ""
+  BSMS:
+    name: ""
+    address: ""
+  Chanctonbury:
+    name: ""
+    address: ""
+  Crawley:
+    name: ""
+    address: ""
+  Felbridge:
+    name: ""
+    address: ""
+  Forest:
+    name: ""
+    address: ""
+  Hassocks:
+    name: ""
+    address: ""
+  Horsham:
+    name: ""
+    address: ""
+  Oakwood:
+    name: ""
+    address: ""
+  Shuttlers:
+    name: ""
+    address: ""
+  Tornados:
+    name: ""
+    address: ""
+  Trident:
+    name: ""
+    address: ""

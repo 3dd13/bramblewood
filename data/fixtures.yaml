@@ -1,0 +1,448 @@
+# Bramblewood match fixtures
+#
+# One entry per match. After you commit a change, the site checks this file
+# and redeploys. See EDITING.md for the full guide.
+#
+#   date:      YYYY-MM-DD
+#   team:      a team code from data/teams.yaml (e.g. "CR Mens")
+#   home_away: H or A
+#   opponent:  opponent club, optionally with its team letter ("Felbridge B").
+#              The club name (without the letter) must be listed in data/venues.yaml.
+#   time:      "HH:MM", 24-hour (e.g. "19:30"). Optional; leave it out if unknown.
+#   notes:     optional free text shown on the site (e.g. "Postponed from 9 Oct")
+#   address:   optional; overrides the venue address for this one match
+#
+# Keep entries in date order; the site sorts them anyway.
+
+# ── October 2026 ────────────────────────────
+- date: 2026-10-06
+  team: CR Mens
+  home_away: A
+  opponent: Horsham
+  time: "19:30"
+- date: 2026-10-08
+  team: WW Mens
+  home_away: H
+  opponent: Felbridge B
+  time: "20:00"
+- date: 2026-10-09
+  team: CR Mixed
+  home_away: H
+  opponent: Horsham
+  time: "20:00"
+- date: 2026-10-09
+  team: WW Combi
+  home_away: H
+  opponent: Forest
+  time: "20:00"
+- date: 2026-10-12
+  team: WW Mens
+  home_away: A
+  opponent: Chanctonbury
+  time: "20:00"
+- date: 2026-10-15
+  team: CR Mens
+  home_away: H
+  opponent: Felbridge
+  time: "20:00"
+- date: 2026-10-16
+  team: TW Mixed 6
+  home_away: H
+  opponent: Trident
+  time: "20:00"
+- date: 2026-10-16
+  team: MS Combi
+  home_away: H
+  opponent: Tornados
+  time: "20:00"
+- date: 2026-10-19
+  team: WW Mens
+  home_away: A
+  opponent: Forest A
+  time: "19:45"
+- date: 2026-10-20
+  team: WW Ladies
+  home_away: A
+  opponent: Horsham
+  time: "19:30"
+- date: 2026-10-22
+  team: CR Mens
+  home_away: H
+  opponent: Crawley
+  time: "20:00"
+- date: 2026-10-26
+  team: WW Ladies
+  home_away: A
+  opponent: Chanctonbury
+  time: "20:00"
+- date: 2026-10-27
+  team: MS Ladies
+  home_away: A
+  opponent: Hassocks
+  time: "20:00"
+
+# ── November 2026 ───────────────────────────
+- date: 2026-11-06
+  team: CR Mens
+  home_away: A
+  opponent: Crawley
+  time: "19:30"
+- date: 2026-11-13
+  team: WW Combi
+  home_away: H
+  opponent: Felbridge
+  time: "20:00"
+- date: 2026-11-18
+  team: WW Combi
+  home_away: A
+  opponent: Forest
+  time: "19:45"
+- date: 2026-11-19
+  team: CR Mens
+  home_away: H
+  opponent: Horsham
+  time: "20:00"
+- date: 2026-11-20
+  team: TW Mixed 6
+  home_away: A
+  opponent: Angel
+  time: "20:00"
+- date: 2026-11-24
+  team: WW Mens
+  home_away: A
+  opponent: Horsham
+  time: "19:30"
+- date: 2026-11-27
+  team: CR Mixed
+  home_away: H
+  opponent: Felbridge
+  time: "20:00"
+- date: 2026-11-27
+  team: MS Combi
+  home_away: H
+  opponent: Hassocks
+  time: "20:00"
+- date: 2026-11-30
+  team: CR Mens
+  home_away: A
+  opponent: Felbridge
+  time: "19:30"
+
+# ── December 2026 ───────────────────────────
+- date: 2026-12-03
+  team: CR Mixed
+  home_away: A
+  opponent: Hassocks
+  time: "20:00"
+- date: 2026-12-04
+  team: WW Combi
+  home_away: H
+  opponent: Horsham
+  time: "20:00"
+- date: 2026-12-04
+  team: WW Ladies
+  home_away: H
+  opponent: Horsham
+  time: "20:00"
+- date: 2026-12-07
+  team: WW Mens
+  home_away: A
+  opponent: Forest B
+  time: "19:45"
+- date: 2026-12-07
+  team: CR Mixed
+  home_away: A
+  opponent: Forest
+  time: "19:45"
+- date: 2026-12-10
+  team: CR Mens
+  home_away: H
+  opponent: Hassocks
+  time: "20:00"
+- date: 2026-12-11
+  team: TW Mens 6
+  home_away: H
+  opponent: Angel
+  time: "20:00"
+- date: 2026-12-11
+  team: MS Ladies
+  home_away: H
+  opponent: Hassocks
+  time: "20:00"
+
+# ── January 2027 ────────────────────────────
+- date: 2027-01-04
+  team: CR Mixed
+  home_away: A
+  opponent: Chanctonbury
+  time: "20:00"
+- date: 2027-01-07
+  team: WW Mens
+  home_away: H
+  opponent: Chanctonbury
+  time: "20:00"
+- date: 2027-01-10
+  team: TW Mens 6
+  home_away: A
+  opponent: AIT B
+  time: "19:30"
+- date: 2027-01-12
+  team: MS Ladies
+  home_away: A
+  opponent: Brighton A
+  time: "20:00"
+- date: 2027-01-13
+  team: CR Mens
+  home_away: A
+  opponent: Forest
+  time: "19:45"
+- date: 2027-01-15
+  team: TW Mens 6
+  home_away: A
+  opponent: Angel
+  time: "20:00"
+- date: 2027-01-15
+  team: WW Combi
+  home_away: H
+  opponent: Oakwood
+  time: "20:00"
+- date: 2027-01-18
+  team: CR Mixed
+  home_away: A
+  opponent: Felbridge
+  time: "19:30"
+- date: 2027-01-22
+  team: WW Ladies
+  home_away: H
+  opponent: Oakwood
+  time: "20:00"
+- date: 2027-01-27
+  team: WW Mens
+  home_away: A
+  opponent: Felbridge B
+  time: "19:30"
+- date: 2027-01-29
+  team: CR Mixed
+  home_away: H
+  opponent: Hassocks
+  time: "20:00"
+
+# ── February 2027 ───────────────────────────
+- date: 2027-02-03
+  team: MS Ladies
+  home_away: A
+  opponent: BATS
+  time: "20:00"
+- date: 2027-02-04
+  team: CR Mens
+  home_away: A
+  opponent: Hassocks
+  time: "20:00"
+- date: 2027-02-05
+  team: CR Mixed
+  home_away: A
+  opponent: Crawley
+  time: "19:30"
+- date: 2027-02-05
+  team: WW Ladies
+  home_away: H
+  opponent: Chanctonbury
+  time: "20:00"
+- date: 2027-02-12
+  team: TW Mens 6
+  home_away: A
+  opponent: Shuttlers
+  time: "19:30"
+- date: 2027-02-15
+  team: WW Combi
+  home_away: A
+  opponent: Chanctonbury
+  time: "20:00"
+- date: 2027-02-16
+  team: MS Combi
+  home_away: A
+  opponent: Brighton A
+- date: 2027-02-18
+  team: TW Mixed 6
+  home_away: A
+  opponent: AIT C
+  time: "19:30"
+- date: 2027-02-22
+  team: TW Mixed 6
+  home_away: A
+  opponent: Trident
+  time: "19:30"
+- date: 2027-02-25
+  team: WW Mens
+  home_away: H
+  opponent: Felbridge A
+  time: "20:00"
+- date: 2027-02-26
+  team: TW Mixed 6
+  home_away: H
+  opponent: Angel
+  time: "20:00"
+
+# ── March 2027 ──────────────────────────────
+- date: 2027-03-03
+  team: WW Combi
+  home_away: A
+  opponent: Felbridge
+  time: "19:30"
+- date: 2027-03-05
+  team: CR Mixed
+  home_away: H
+  opponent: Chanctonbury
+  time: "20:00"
+- date: 2027-03-07
+  team: WW Ladies
+  home_away: A
+  opponent: Oakwood
+  time: "18:00"
+- date: 2027-03-08
+  team: TW Mens 6
+  home_away: A
+  opponent: Trident
+  time: "19:30"
+- date: 2027-03-09
+  team: WW Combi
+  home_away: A
+  opponent: Horsham
+  time: "19:30"
+- date: 2027-03-11
+  team: TW Mens 6
+  home_away: A
+  opponent: AIT A
+  time: "19:30"
+- date: 2027-03-11
+  team: CR Mens
+  home_away: H
+  opponent: Forest
+  time: "20:00"
+- date: 2027-03-12
+  team: MS Combi
+  home_away: H
+  opponent: BSMS
+  time: "20:00"
+- date: 2027-03-14
+  team: WW Combi
+  home_away: A
+  opponent: Oakwood
+  time: "18:00"
+- date: 2027-03-18
+  team: WW Mens
+  home_away: H
+  opponent: Forest A
+  time: "20:00"
+- date: 2027-03-19
+  team: TW Mens 6
+  home_away: H
+  opponent: Shuttlers
+  time: "20:00"
+- date: 2027-03-19
+  team: WW Combi
+  home_away: H
+  opponent: Chanctonbury
+  time: "20:00"
+- date: 2027-03-22
+  team: TW Mixed 6
+  home_away: A
+  opponent: AIT A
+  time: "19:30"
+- date: 2027-03-24
+  team: MS Combi
+  home_away: A
+  opponent: BATS
+  time: "20:00"
+- date: 2027-03-25
+  team: TW Mens 6
+  home_away: H
+  opponent: AIT A
+  time: "20:00"
+- date: 2027-03-30
+  team: MS Combi
+  home_away: A
+  opponent: BSMS
+  time: "20:00"
+
+# ── April 2027 ──────────────────────────────
+- date: 2027-04-01
+  team: WW Mens
+  home_away: H
+  opponent: Horsham
+  time: "20:00"
+- date: 2027-04-02
+  team: TW Mixed 6
+  home_away: H
+  opponent: AIT C
+  time: "20:00"
+- date: 2027-04-02
+  team: MS Combi
+  home_away: H
+  opponent: BATS
+  time: "20:00"
+- date: 2027-04-06
+  team: CR Mixed
+  home_away: A
+  opponent: Horsham
+  time: "19:30"
+- date: 2027-04-08
+  team: WW Mens
+  home_away: H
+  opponent: Forest B
+  time: "20:00"
+- date: 2027-04-09
+  team: TW Mixed 6
+  home_away: H
+  opponent: AIT B
+  time: "20:00"
+- date: 2027-04-16
+  team: TW Mens 6
+  home_away: H
+  opponent: Trident
+  time: "20:00"
+- date: 2027-04-16
+  team: MS Ladies
+  home_away: H
+  opponent: Brighton A
+  time: "20:00"
+- date: 2027-04-22
+  team: TW Mixed 6
+  home_away: A
+  opponent: AIT B
+  time: "19:30"
+- date: 2027-04-28
+  team: WW Mens
+  home_away: A
+  opponent: Felbridge A
+  time: "19:30"
+- date: 2027-04-30
+  team: CR Mixed
+  home_away: H
+  opponent: Forest
+  time: "20:00"
+- date: 2027-04-30
+  team: MS Combi
+  home_away: H
+  opponent: Brighton A
+
+# ── May 2027 ────────────────────────────────
+- date: 2027-05-07
+  team: TW Mixed 6
+  home_away: H
+  opponent: AIT A
+  time: "20:00"
+- date: 2027-05-14
+  team: TW Mens 6
+  home_away: H
+  opponent: AIT B
+  time: "20:00"
+- date: 2027-05-14
+  team: MS Ladies
+  home_away: H
+  opponent: BATS
+- date: 2027-05-21
+  team: CR Mixed
+  home_away: H
+  opponent: Crawley
+  time: "20:00"
