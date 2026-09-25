@@ -262,6 +262,7 @@
   team: MS Combi
   home_away: A
   opponent: Brighton A
+  time: "20:00"
 - date: 2027-02-18
   team: TW Mixed 6
   home_away: A
@@ -425,6 +426,7 @@
   team: MS Combi
   home_away: H
   opponent: Brighton A
+  time: "20:00"
 
 # ── May 2027 ────────────────────────────────
 - date: 2027-05-07
@@ -441,6 +443,7 @@
   team: MS Ladies
   home_away: H
   opponent: BATS
+  time: "20:00"
 - date: 2027-05-21
   team: CR Mixed
   home_away: H

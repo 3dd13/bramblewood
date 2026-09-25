@@ -2,8 +2,8 @@
 # `code` is what you type in fixtures.yaml. Colours are assigned by the order below.
 
 - code: WW Mens
-  name: WW Men's
-  league: WW League
+  name: West Weald Men's
+  league: West Weald League
   type: Men's
 
 - code: CR Mens
@@ -27,8 +27,8 @@
   type: Mixed
 
 - code: WW Combi
-  name: WW Combi
-  league: WW League
+  name: West Weald Combi
+  league: West Weald League
   type: Mixed
 
 - code: MS Combi
@@ -42,6 +42,6 @@
   type: Ladies
 
 - code: WW Ladies
-  name: WW Ladies
-  league: WW League
+  name: West Weald Ladies
+  league: West Weald League
   type: Ladies
