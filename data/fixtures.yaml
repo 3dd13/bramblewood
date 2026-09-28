@@ -320,6 +320,11 @@
   home_away: H
   opponent: Forest
   time: "20:00"
+- date: 2027-03-11
+  team: MS Combi
+  home_away: A
+  opponent: Tornados
+  time: "20:00"
 - date: 2027-03-12
   team: MS Combi
   home_away: H
