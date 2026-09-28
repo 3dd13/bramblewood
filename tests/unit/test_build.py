@@ -5,6 +5,7 @@ Run: .venv/bin/python -m pytest
 import datetime as dt
 import importlib.util
 import json
+import re
 import os
 import shutil
 import subprocess
@@ -344,3 +345,83 @@ def test_invalid_team_fields_are_rejected(data_dir, line, message):
     res = run_build(data_dir, check=True)
     assert res.returncode == 1
     assert message in res.stderr and "teams.yaml:" in res.stderr
+
+
+# ── Home venue booking export (admin/, unlisted) ───────────────────────────
+# Test data home dates: 8 Oct (Thu), 23 Oct, 20 Nov, 26 Nov (Thu), 4 Dec, 11 Dec 2026; 22 Jan 2027.
+
+import csv as _csv
+
+
+def read_csv(path):
+    raw = path.read_bytes()
+    return list(_csv.reader(io_text(raw)))
+
+
+def io_text(raw):
+    import io
+    return io.StringIO(raw.decode("utf-8"), newline="")
+
+
+def test_booking_export_files(built_site):
+    admin = built_site / "admin"
+    assert sorted(p.name for p in admin.iterdir()) == [
+        "home-bookings-jan-mar-2027.csv", "home-bookings-oct-dec-2026.csv",
+        "home-bookings-thursdays-2026-27.csv", "index.html"]  # no file for empty quarters
+
+
+def test_booking_export_quarter_content(built_site):
+    rows = read_csv(built_site / "admin" / "home-bookings-oct-dec-2026.csv")
+    assert rows == [
+        ["Date", "Day", "Matches"],
+        ["8 Oct 2026", "Thu", "1"], ["23 Oct 2026", "Fri", "1"], ["20 Nov 2026", "Fri", "1"],
+        ["26 Nov 2026", "Thu", "1"], ["4 Dec 2026", "Fri", "1"], ["11 Dec 2026", "Fri", "1"]]
+    assert read_csv(built_site / "admin" / "home-bookings-jan-mar-2027.csv") == [
+        ["Date", "Day", "Matches"], ["22 Jan 2027", "Fri", "1"]]
+
+
+def test_booking_export_thursdays_only(built_site):
+    assert read_csv(built_site / "admin" / "home-bookings-thursdays-2026-27.csv") == [
+        ["Date", "Day", "Matches"], ["8 Oct 2026", "Thu", "1"], ["26 Nov 2026", "Thu", "1"]]
+
+
+def test_booking_export_counts_and_quarter_boundary(data_dir, tmp_path):
+    add_fixture(data_dir, """- date: 2026-10-08
+  team: BB Mixed
+  home_away: H
+  opponent: Meadow
+  time: "20:00"
+- date: 2026-12-31
+  team: DD Combi
+  home_away: H
+  opponent: Hilltop
+- date: 2027-01-01
+  team: CC Ladies
+  home_away: H
+  opponent: Hilltop
+- date: 2027-01-01
+  team: AA Mens
+  home_away: A
+  opponent: Meadow""")
+    res = run_build(data_dir, tmp_path / "out")
+    assert res.returncode == 0, res.stderr
+    admin = tmp_path / "out" / "admin"
+    q4 = read_csv(admin / "home-bookings-oct-dec-2026.csv")
+    assert ["8 Oct 2026", "Thu", "2"] in q4           # two home matches that day
+    assert q4[-1] == ["31 Dec 2026", "Thu", "1"]       # last day of the quarter
+    q1 = read_csv(admin / "home-bookings-jan-mar-2027.csv")
+    assert q1[1] == ["1 Jan 2027", "Fri", "1"]         # away match that day not counted
+    thu = read_csv(admin / "home-bookings-thursdays-2026-27.csv")
+    assert ["31 Dec 2026", "Thu", "1"] in thu and all(r[1] == "Thu" for r in thu[1:])
+
+
+def test_booking_admin_page_is_unlisted(built_site):
+    page = (built_site / "admin" / "index.html").read_text()
+    assert '<meta name="robots" content="noindex, nofollow">' in page
+    for name in ("home-bookings-oct-dec-2026.csv", "home-bookings-jan-mar-2027.csv", "home-bookings-thursdays-2026-27.csv"):
+        assert f'href="{name}"' in page
+    assert "6 dates · 6 matches" in page
+    # The public pages never link to it.
+    # The public pages never link to it (note "badminton" contains "admin", so look for the path).
+    for public in ("index.html", "app.js"):
+        assert not re.search(r"admin/", (built_site / public).read_text()), public

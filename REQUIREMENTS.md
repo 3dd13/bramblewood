@@ -63,6 +63,10 @@ The home venue is **Brambletye School, Lewes Rd, East Grinstead RH19 3PD**.
 - **FR-12c:** The footer links to the club website, https://www.bramblewoodbadminton.club/.
 - **FR-12d:** External links open in a new tab (`rel="noopener"`), show an external-link icon, and tell screen readers they open in a new tab. `results_url` must be `https://` (checked by the build).
 
+### 4.3b Home venue booking export (admins)
+- **FR-12e:** Every build writes an unlisted admin page at `admin/` with CSV lists of home-match dates and the number of home matches on each (`Date,Day,Matches`, e.g. `8 Oct 2026,Thu,1`, sorted by date). There's one file per calendar quarter that has home matches, plus one whole-season list of Thursdays only. Past dates are kept and away matches excluded.
+- **FR-12f:** The admin page isn't linked from any public page, carries `noindex, nofollow`, and contains no data beyond the public fixtures. Unlisted is not access control, and that's acceptable for this data.
+
 ### 4.4 Venues
 - **FR-13:** Home matches use the home venue. Away matches use the opponent club's venue from `data/venues.yaml`, looked up by club name without the team letter ("Felbridge B" → "Felbridge"). A club can have a different venue per league (`leagues:`), because some clubs host different leagues at different halls.
 - **FR-14:** Allow an individual match to override its address.

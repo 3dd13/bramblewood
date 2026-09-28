@@ -12,7 +12,10 @@ Errors are printed with file and line numbers. On GitHub Actions they are
 also emitted as annotations so they show up on the commit.
 """
 import argparse
+import csv
 import datetime as dt
+import html
+import io
 import json
 import os
 import re
@@ -346,6 +349,91 @@ def build_ics(name, fixtures, teams_by_code, site_url):
     return "\r\n".join(ics_fold(l) for l in lines) + "\r\n"
 
 
+# ── Home venue bookings (unlisted admin export) ───────────────────────────
+# Written to _site/admin/ for the club admins to send to the venue manager. Never linked
+# from the public pages; it holds the same home fixtures the site already shows, no personal data.
+
+MONTHS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]
+
+
+def home_booking_rows(fixtures):
+    """[(date, number of home matches)] for every date with at least one home match, in date order."""
+    counts = {}
+    for f in fixtures:
+        if f["homeAway"] == "H":
+            d = dt.date.fromisoformat(f["date"])
+            counts[d] = counts.get(d, 0) + 1
+    return sorted(counts.items())
+
+
+def quarter_of(date):
+    """Calendar quarter as (file slug, label), e.g. ("oct-dec-2026", "Oct–Dec 2026")."""
+    first, last = MONTHS[(date.month - 1) // 3 * 3], MONTHS[(date.month - 1) // 3 * 3 + 2]
+    return f"{first}-{last}-{date.year}", f"{first.title()}–{last.title()} {date.year}"
+
+
+def booking_csv(rows):
+    buf = io.StringIO()
+    writer = csv.writer(buf)
+    writer.writerow(["Date", "Day", "Matches"])
+    for d, n in rows:
+        writer.writerow([f"{d.day} {d:%b %Y}", f"{d:%a}", n])
+    return buf.getvalue().encode("utf-8")
+
+
+def write_home_bookings(fixtures, out_dir, generated):
+    rows = home_booking_rows(fixtures)
+    admin = out_dir / "admin"
+    admin.mkdir()
+    lists = []  # (label, file name, rows)
+
+    by_quarter = {}
+    for d, n in rows:
+        by_quarter.setdefault(quarter_of(d), []).append((d, n))
+    for (slug_, label), q_rows in by_quarter.items():
+        lists.append((f"Home dates, {label}", f"home-bookings-{slug_}.csv", q_rows))
+
+    by_season = {}
+    for d, n in rows:
+        if d.weekday() == 3:  # Thursday
+            by_season.setdefault(season_of(d), []).append((d, n))
+    for season, s_rows in by_season.items():
+        lists.append((f"Thursdays only, 20{season}", f"home-bookings-thursdays-20{season.replace('/', '-')}.csv", s_rows))
+
+    for _, name, l_rows in lists:
+        (admin / name).write_bytes(booking_csv(l_rows))
+
+    items = "\n".join(
+        f'    <li><a href="{html.escape(name)}">{html.escape(label)}</a>'
+        f' <span>{len(l_rows)} dates · {sum(n for _, n in l_rows)} matches</span></li>'
+        for label, name, l_rows in lists) or "    <li>No home matches.</li>"
+    (admin / "index.html").write_text(f"""<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Home venue bookings · {CLUB_NAME}</title>
+  <style>
+    body {{ font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; margin: 0 auto; max-width: 40rem; padding: 24px 16px; color: #161b2e; }}
+    li {{ margin: 10px 0; }} span {{ color: #5b6480; }} a {{ color: #3730a3; font-weight: 600; }}
+    p {{ color: #5b6480; }}
+  </style>
+</head>
+<body>
+  <h1>Home venue bookings</h1>
+  <p>Every date with a home match at {html.escape(CLUB_NAME)}'s venue and how many matches are on it
+    (Date, Day, Matches). For the club admins and the venue manager, not linked from the public site.</p>
+  <ul>
+{items}
+  </ul>
+  <p>Last updated {generated.day} {generated:%b %Y}. Updates automatically whenever the fixtures change.</p>
+</body>
+</html>
+""", encoding="utf-8")
+    return lists
+
+
 # ── Main ───────────────────────────────────────────────────────────────────
 
 def report_errors():
@@ -394,6 +482,8 @@ def main():
         (OUT / "calendar" / f"{t['slug']}.ics").write_text(
             build_ics(f"{CLUB_NAME} – {t['code']}", mine, teams_by_code, site_url), encoding="utf-8")
 
+    bookings = write_home_bookings(fixtures, OUT, build_time())
+
     payload = {
         "generated": build_time().isoformat(timespec="seconds"),
         "home": home,
@@ -407,7 +497,7 @@ def main():
     index.write_text(index.read_text(encoding="utf-8")
                      .replace("__FIXTURES_JSON__", data_json.replace("</", "<\\/")), encoding="utf-8")
     (OUT / ".nojekyll").touch()
-    print(f"✓ Built site into {rel(OUT)}/")
+    print(f"✓ Built site into {rel(OUT)}/ (+ admin/ home booking export: {len(bookings)} lists)")
 
 
 if __name__ == "__main__":

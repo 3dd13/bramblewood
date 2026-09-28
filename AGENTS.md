@@ -91,6 +91,7 @@ itself stays plain HTML/CSS/JS built by Python.
 | `data/teams.yaml` | Team `code` (used in fixtures), display `name`, `league`, `type`, optional `division` and `results_url` (https only; the league's results/table page). Colours come from the league (one family per league, Men's → Mixed → Ladies within it; see `FAMILIES` in `site/app.js`). |
 | `data/venues.yaml` | `home` venue plus `clubs:` mapping club name → `{name, address, leagues?}`. `leagues:` (keyed by the `league` in teams.yaml) gives a club a different venue in that league. |
 | `scripts/build.py` | Loads YAML **as strings** via `yaml.compose` (no implicit date/number conversion, and keeps line numbers), checks it, writes `_site/`. `--data`/`--out` options; `SOURCE_DATE_EPOCH` for reproducible builds. |
+| `_site/admin/` (built) | Unlisted home venue booking export: quarterly CSVs + Thursdays CSV + `index.html` (noindex). Built by `write_home_bookings()` in `build.py`. **Never link it from the public pages.** |
 | `scripts/privacy_check.py` | Fails on committed secrets or exports, emails, phones, personal-data fields, or blocklisted names. Never prints what it matched. |
 | `site/index.html` | Page shell. `__FIXTURES_JSON__` is replaced at build time; the `<head>` script applies the saved theme before first paint. |
 | `site/app.js` | Vanilla JS (IIFE), team-first UI: Overview/Fixtures pages (push/popstate), team selection, list/calendar, add-to-calendar panel, theme switch. |

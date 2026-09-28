@@ -46,6 +46,23 @@ The calendar feeds (`.ics`) update with every deploy. Subscribed calendars pick
 up changes the next time they refresh, which can take from a few hours up to a
 day for Google Calendar.
 
+## Home venue booking export (admins)
+
+For booking the hall with the venue manager, the site builds an unlisted admin page:
+
+**https://3dd13.github.io/bramblewood/admin/**
+
+It links to CSV files (columns `Date,Day,Matches`, e.g. `8 Oct 2026,Thu,1`):
+
+| File | Contents |
+|---|---|
+| `home-bookings-oct-dec-2026.csv` (and `jan-mar-2027`, `apr-jun-2027`, …) | Every date with a home match in that quarter, and how many |
+| `home-bookings-thursdays-2026-27.csv` | Thursday home dates only, for the whole season (these need special arrangement with the venue) |
+
+- The files update automatically every time the fixtures change, so there's nothing to run. Download a fresh copy before sending it to the venue.
+- Past dates stay in the files as a booking record. Away matches are never included.
+- The page isn't linked from the public site and asks search engines not to index it. **Unlisted isn't secret**, though: don't post the link publicly. It holds nothing that isn't already on the public site.
+
 ## Keep it public-safe
 
 The website and this repository are **public**.

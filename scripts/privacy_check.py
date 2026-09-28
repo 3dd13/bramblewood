@@ -36,7 +36,7 @@ PERSONAL_KEYS = {"email", "phone", "mobile", "player", "players", "captain", "ca
                  "member", "members", "gender", "availability", "squad", "contact"}
 EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
 UK_PHONE = re.compile(r"(?<![\w/])(?:\+44\s?7\d{3}|07\d{3})\s?\d{3}\s?\d{3}(?!\d)")
-TEXT_SUFFIXES = {".yaml", ".yml", ".json", ".html", ".js", ".css", ".ics", ".txt", ".md", ".svg"}
+TEXT_SUFFIXES = {".yaml", ".yml", ".json", ".html", ".js", ".css", ".ics", ".txt", ".md", ".svg", ".csv"}
 # Addresses that are allowed to appear (none today; add public club contact addresses here if ever needed).
 ALLOWED_EMAILS = set()
 

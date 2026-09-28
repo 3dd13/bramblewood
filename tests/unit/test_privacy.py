@@ -55,3 +55,12 @@ def test_repository_is_clean():
     """The real repo + data must pass (forbidden files, personal fields, contact details)."""
     res = run(ROOT / "does-not-exist")
     assert res.returncode == 0, res.stderr
+
+
+def test_csv_exports_in_the_site_are_scanned(tmp_path):
+    site = site_with(tmp_path, "<p>ok</p>")
+    (site / "admin").mkdir()
+    (site / "admin" / "home-bookings.csv").write_text("Date,Day,Matches\n8 Oct 2026,Thu,1,quux@example.org\n")
+    res = run(site)
+    assert res.returncode == 1
+    assert "admin/home-bookings.csv" in res.stderr and "email address found" in res.stderr

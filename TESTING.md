@@ -15,7 +15,7 @@ request. **Deploying to GitHub Pages happens only when every stage passes on `ma
 | # | Stage | Tool | Catches | Runs on | CI job |
 |---|---|---|---|---|---|
 | 1 | Data validation | `scripts/build.py --check` | Typos and invalid fixtures, with file and line | real data | `checks` |
-| 2 | Unit tests | `pytest` (`tests/unit/test_build.py`) | Validation rules, dates and seasons, ICS escaping and line folding, reproducible builds, stable event IDs | test + real data | `checks` |
+| 2 | Unit tests | `pytest` (`tests/unit/test_build.py`) | Validation rules, dates and seasons, ICS escaping and line folding, reproducible builds, stable event IDs, the admin home booking export (quarters, Thursdays, counts, unlisted) | test + real data | `checks` |
 | 3 | Calendar feeds | `icalendar` in pytest | `.ics` files that calendar apps would reject: required properties, CRLF, 75-octet lines, BST/GMT offsets, event counts | test data | `checks` |
 | 4 | Link check | [lychee](https://github.com/lycheeverse/lychee-action), offline | Broken links between files in `_site/` and in the docs | real data | `checks` |
 | 5 | UI behaviour | Playwright (`tests/e2e/behaviour.spec.ts`) | Broken filters, views, URL state, Back/Forward, calendar panel, theme, console errors, overflow at phone width | test data | `e2e` |
