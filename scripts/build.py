@@ -31,8 +31,6 @@ DATA = ROOT / "data"  # overridden by --data
 SITE_SRC = ROOT / "site"
 OUT = ROOT / "_site"  # overridden by --out
 
-CLUB_NAME = "Bramblewood"
-TIMEZONE = "Europe/London"
 MATCH_DURATION = dt.timedelta(hours=2, minutes=30)
 ON_CI = os.environ.get("GITHUB_ACTIONS") == "true"
 
@@ -84,13 +82,131 @@ def club_of(opponent):
     return re.sub(r"\s+[A-Z]$", "", opponent)
 
 
-def season_of(date):
-    start = date.year if date.month >= 8 else date.year - 1
+def season_of(date, start_month):
+    start = date.year if date.month >= start_month else date.year - 1
     return f"{start % 100:02d}/{(start + 1) % 100:02d}"
 
 
 def slug(text):
     return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
+
+
+# ── Club settings ──────────────────────────────────────────────────────────
+# data/club.yaml holds everything that makes this site one club's, so other
+# clubs can reuse the code by editing data files only.
+
+# section -> {key: required?}
+CLUB_SCHEMA = {
+    "club": {"short_name": True, "full_name": True, "website_url": False},
+    "site": {"title": True, "description": True, "locale": True, "timezone": True},
+    "calendar": {"uid_domain": True},
+    "season": {"start_month": True},
+    "branding": {"brand": True, "brand_ink": False, "brand_dark": False, "brand_ink_dark": False, "focus_dark": False},
+    "bookings": {"club_night_weekday": True},
+}
+OPTIONAL_SECTIONS = {"branding", "bookings"}
+# The original indigo theme, used for any colour club.yaml leaves out.
+BRAND_DEFAULTS = {"brand": "#4f46e5", "brand_ink": "#3730a3", "brand_dark": "#8b85ff",
+                  "brand_ink_dark": "#b9b5ff", "focus_dark": "#a5a0ff"}
+# The calendar feeds bundle only this zone's VTIMEZONE (see VTIMEZONE below).
+TIMEZONES = {"Europe/London"}
+WEEKDAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+
+
+def mapping_items(node):
+    """[(key, value node, line)] of a YAML mapping."""
+    return [(k.value, v, k.start_mark.line + 1) for k, v in node.value]
+
+
+def read_club_sections(node):
+    """{section: {key: (value, line)}}, reporting unknown, missing and misshapen entries."""
+    if not isinstance(node, yaml.MappingNode):
+        error("club.yaml", 1, "Expected sections like `club:`, `site:` and `calendar:`")
+        return {}
+    sections, lines = {}, {}
+    for name, value, line in mapping_items(node):
+        if name not in CLUB_SCHEMA:
+            error("club.yaml", line, f"Unknown section '{name}' (allowed: {', '.join(CLUB_SCHEMA)})")
+            continue
+        if not isinstance(value, yaml.MappingNode):
+            error("club.yaml", line, f"`{name}:` must be followed by indented `key: value` lines")
+            continue
+        fields = sections[name] = {}
+        lines[name] = line
+        for key, v, kline in mapping_items(value):
+            if key not in CLUB_SCHEMA[name]:
+                error("club.yaml", kline, f"Unknown setting '{key}' in `{name}:` (allowed: {', '.join(CLUB_SCHEMA[name])})")
+            elif not isinstance(v, yaml.ScalarNode):
+                error("club.yaml", kline, f"`{name}.{key}` must be a single value on the same line")
+            else:
+                fields[key] = (v.value.strip(), kline)
+    for name, keys in CLUB_SCHEMA.items():
+        if name not in sections:
+            if name not in OPTIONAL_SECTIONS:
+                error("club.yaml", None, f"Missing section `{name}:` (see data/club.yaml in the original repository for an example)")
+            continue
+        for key, required in keys.items():
+            if required and not sections[name].get(key, ("",))[0]:
+                error("club.yaml", lines[name], f"Missing `{key}` under `{name}:`")
+    return sections
+
+
+def read_club():
+    if not (DATA / "club.yaml").exists():
+        error("club.yaml", None, "File is missing. Copy data/club.yaml from the original repository and edit it")
+        return None
+    node = load("club.yaml")
+    if node is None:
+        return None
+    s = read_club_sections(node)
+    get = lambda section, key, default="": s.get(section, {}).get(key, (default, 1))
+
+    url, line = get("club", "website_url")
+    if url and not valid_https_url(url):
+        error("club.yaml", line, f"website_url must be a full https:// link, got '{url}'")
+    tz, line = get("site", "timezone")
+    if tz and tz not in TIMEZONES:
+        error("club.yaml", line, f"Timezone '{tz}' is not supported yet (use: {', '.join(sorted(TIMEZONES))})")
+    locale, line = get("site", "locale")
+    if locale and not re.fullmatch(r"[a-z]{2,3}(-[A-Za-z0-9]{2,8})*", locale):
+        error("club.yaml", line, f"Bad locale '{locale}' (use a language tag like en-GB)")
+    uid, line = get("calendar", "uid_domain")
+    if uid and not re.fullmatch(r"[a-z0-9]+([.-][a-z0-9]+)*", uid):
+        error("club.yaml", line, f"Bad uid_domain '{uid}' (use lowercase letters, digits and dashes, e.g. riverside-fixtures)")
+    month, line = get("season", "start_month")
+    if month and not (month.isdigit() and 1 <= int(month) <= 12):
+        error("club.yaml", line, f"start_month must be a month number 1–12 (8 = August), got '{month}'")
+        month = ""
+
+    colours = {}
+    for key, default in BRAND_DEFAULTS.items():
+        value, line = get("branding", key, default)
+        if not re.fullmatch(r"#[0-9a-fA-F]{6}", value):
+            error("club.yaml", line, f"`branding.{key}` must be a colour like \"#4f46e5\" (in quotes), got '{value}'")
+        colours[key] = value
+
+    weekday = None
+    if "bookings" in s:
+        day, line = get("bookings", "club_night_weekday")
+        if day and day.lower() not in WEEKDAYS:
+            error("club.yaml", line, f"club_night_weekday must be a day name like thursday, got '{day}'")
+        elif day:
+            weekday = WEEKDAYS.index(day.lower())
+
+    return {
+        "short_name": get("club", "short_name")[0],
+        "full_name": get("club", "full_name")[0],
+        "website_url": url,
+        "title": get("site", "title")[0],
+        "description": get("site", "description")[0],
+        "locale": locale,
+        "timezone": tz,
+        "uid_domain": uid,
+        "season_start": int(month or 8),
+        "colours": colours,
+        "bookings": "bookings" in s,
+        "club_night": weekday,
+    }
 
 
 # ── Validation ─────────────────────────────────────────────────────────────
@@ -177,7 +293,7 @@ FIELDS = {"date", "team", "home_away", "opponent", "time", "notes", "address"}
 REQUIRED = ("date", "team", "home_away", "opponent")
 
 
-def read_fixtures(teams, home, clubs):
+def read_fixtures(teams, home, clubs, season_start):
     node = load("fixtures.yaml")
     if node is None:
         return []
@@ -251,7 +367,7 @@ def read_fixtures(teams, home, clubs):
         fixtures.append({
             "id": f"{date.isoformat()}-{slug(f['team'])}-{slug(f['opponent'])}",
             "date": date.isoformat(),
-            "season": season_of(date),
+            "season": season_of(date, season_start),
             "team": f["team"],
             "homeAway": ha,
             "opponent": f["opponent"],
@@ -306,16 +422,16 @@ def ics_fold(line):
     return "\r\n ".join(parts)
 
 
-def build_ics(name, fixtures, teams_by_code, site_url):
+def build_ics(name, fixtures, teams_by_code, site_url, club):
     stamp = build_time().strftime("%Y%m%dT%H%M%SZ")
     lines = [
         "BEGIN:VCALENDAR",
         "VERSION:2.0",
-        f"PRODID:-//{CLUB_NAME}//Fixtures//EN",
+        f"PRODID:-//{club['short_name']}//Fixtures//EN",
         "CALSCALE:GREGORIAN",
         "METHOD:PUBLISH",
         f"X-WR-CALNAME:{ics_escape(name)}",
-        f"X-WR-TIMEZONE:{TIMEZONE}",
+        f"X-WR-TIMEZONE:{club['timezone']}",
         "REFRESH-INTERVAL;VALUE=DURATION:PT6H",
         "X-PUBLISHED-TTL:PT6H",
         *VTIMEZONE.splitlines(),
@@ -332,12 +448,12 @@ def build_ics(name, fixtures, teams_by_code, site_url):
         if site_url:
             desc.append(site_url)
         location = ", ".join(x for x in (f["venueName"], f["address"]) if x)
-        lines += ["BEGIN:VEVENT", f"UID:{f['id']}@bramblewood-fixtures", f"DTSTAMP:{stamp}"]
+        lines += ["BEGIN:VEVENT", f"UID:{f['id']}@{club['uid_domain']}", f"DTSTAMP:{stamp}"]
         if f["time"]:
             start = dt.datetime.combine(date, dt.time.fromisoformat(f["time"]))
             end = start + MATCH_DURATION
-            lines += [f"DTSTART;TZID={TIMEZONE}:{start:%Y%m%dT%H%M%S}",
-                      f"DTEND;TZID={TIMEZONE}:{end:%Y%m%dT%H%M%S}"]
+            lines += [f"DTSTART;TZID={club['timezone']}:{start:%Y%m%dT%H%M%S}",
+                      f"DTEND;TZID={club['timezone']}:{end:%Y%m%dT%H%M%S}"]
         else:
             lines += [f"DTSTART;VALUE=DATE:{date:%Y%m%d}",
                       f"DTEND;VALUE=DATE:{date + dt.timedelta(days=1):%Y%m%d}"]
@@ -381,7 +497,7 @@ def booking_csv(rows):
     return buf.getvalue().encode("utf-8")
 
 
-def write_home_bookings(fixtures, out_dir, generated):
+def write_home_bookings(fixtures, out_dir, generated, club):
     rows = home_booking_rows(fixtures)
     admin = out_dir / "admin"
     admin.mkdir()
@@ -393,12 +509,14 @@ def write_home_bookings(fixtures, out_dir, generated):
     for (slug_, label), q_rows in by_quarter.items():
         lists.append((f"Home dates, {label}", f"home-bookings-{slug_}.csv", q_rows))
 
+    # Club night: one extra list per season of the home dates on that weekday.
     by_season = {}
     for d, n in rows:
-        if d.weekday() == 3:  # Thursday
-            by_season.setdefault(season_of(d), []).append((d, n))
+        if d.weekday() == club["club_night"]:
+            by_season.setdefault(season_of(d, club["season_start"]), []).append((d, n))
+    day = WEEKDAYS[club["club_night"]] + "s" if club["club_night"] is not None else ""
     for season, s_rows in by_season.items():
-        lists.append((f"Thursdays only, 20{season}", f"home-bookings-thursdays-20{season.replace('/', '-')}.csv", s_rows))
+        lists.append((f"{day.title()} only, 20{season}", f"home-bookings-{day}-20{season.replace('/', '-')}.csv", s_rows))
 
     for _, name, l_rows in lists:
         (admin / name).write_bytes(booking_csv(l_rows))
@@ -408,21 +526,21 @@ def write_home_bookings(fixtures, out_dir, generated):
         f' <span>{len(l_rows)} dates · {sum(n for _, n in l_rows)} matches</span></li>'
         for label, name, l_rows in lists) or "    <li>No home matches.</li>"
     (admin / "index.html").write_text(f"""<!doctype html>
-<html lang="en-GB">
+<html lang="{html.escape(club['locale'])}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow">
-  <title>Home venue bookings · {CLUB_NAME}</title>
+  <title>Home venue bookings · {html.escape(club['short_name'])}</title>
   <style>
     body {{ font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; margin: 0 auto; max-width: 40rem; padding: 24px 16px; color: #161b2e; }}
-    li {{ margin: 10px 0; }} span {{ color: #5b6480; }} a {{ color: #3730a3; font-weight: 600; }}
+    li {{ margin: 10px 0; }} span {{ color: #5b6480; }} a {{ color: {club['colours']['brand_ink']}; font-weight: 600; }}
     p {{ color: #5b6480; }}
   </style>
 </head>
 <body>
   <h1>Home venue bookings</h1>
-  <p>Every date with a home match at {html.escape(CLUB_NAME)}'s venue and how many matches are on it
+  <p>Every date with a home match at {html.escape(club['short_name'])}'s venue and how many matches are on it
     (Date, Day, Matches). For the club admins and the venue manager, not linked from the public site.</p>
   <ul>
 {items}
@@ -432,6 +550,36 @@ def write_home_bookings(fixtures, out_dir, generated):
 </html>
 """, encoding="utf-8")
     return lists
+
+
+# ── Site templating ────────────────────────────────────────────────────────
+# site/ files carry __PLACEHOLDERS__ for the club settings (data/club.yaml); the build
+# fills them in, so the site source itself names no club and has no fixed brand colour.
+
+def site_placeholders(club):
+    c = club["colours"]
+    text = {
+        "__LANG__": club["locale"],
+        "__SITE_TITLE__": club["title"],
+        "__SITE_DESCRIPTION__": club["description"],
+        "__CLUB_FULL_NAME__": club["full_name"],
+        "__CLUB_SHORT_NAME__": club["short_name"],
+    }
+    colours = {  # validated as #rrggbb, so safe in HTML, CSS and SVG as-is
+        "__BRAND_INK_DARK__": c["brand_ink_dark"],
+        "__BRAND_DARK__": c["brand_dark"],
+        "__BRAND_INK__": c["brand_ink"],
+        "__FOCUS_DARK__": c["focus_dark"],
+        "__BRAND__": c["brand"],
+    }
+    return {**{k: html.escape(v) for k, v in text.items()}, **colours}
+
+
+def fill_placeholders(path, values):
+    text = path.read_text(encoding="utf-8")
+    for key, value in values.items():
+        text = text.replace(key, value)
+    path.write_text(text, encoding="utf-8")
 
 
 # ── Main ───────────────────────────────────────────────────────────────────
@@ -458,9 +606,10 @@ def main():
     check_only = args.check
     site_url = os.environ.get("SITE_URL", "").rstrip("/")
 
+    club = read_club()
     teams = read_teams()
     home, clubs = read_venues()
-    fixtures = read_fixtures(teams, home, clubs)
+    fixtures = read_fixtures(teams, home, clubs, club["season_start"] if club else 8)
 
     if errors:
         report_errors()
@@ -472,20 +621,25 @@ def main():
     if OUT.exists():
         shutil.rmtree(OUT)
     shutil.copytree(SITE_SRC, OUT)
+    values = site_placeholders(club)
+    for name in ("index.html", "style.css", "favicon.svg"):
+        fill_placeholders(OUT / name, values)
 
     teams_by_code = {t["code"]: t for t in teams}
     (OUT / "calendar").mkdir()
     (OUT / "calendar" / "all.ics").write_text(
-        build_ics(f"{CLUB_NAME} – all matches", fixtures, teams_by_code, site_url), encoding="utf-8")
+        build_ics(f"{club['short_name']} – all matches", fixtures, teams_by_code, site_url, club), encoding="utf-8")
     for t in teams:
         mine = [f for f in fixtures if f["team"] == t["code"]]
         (OUT / "calendar" / f"{t['slug']}.ics").write_text(
-            build_ics(f"{CLUB_NAME} – {t['code']}", mine, teams_by_code, site_url), encoding="utf-8")
+            build_ics(f"{club['short_name']} – {t['code']}", mine, teams_by_code, site_url, club), encoding="utf-8")
 
-    bookings = write_home_bookings(fixtures, OUT, build_time())
+    bookings = write_home_bookings(fixtures, OUT, build_time(), club) if club["bookings"] else None
 
     payload = {
         "generated": build_time().isoformat(timespec="seconds"),
+        "club": {"shortName": club["short_name"], "fullName": club["full_name"],
+                 "websiteUrl": club["website_url"], "locale": club["locale"]},
         "home": home,
         "teams": teams,
         "fixtures": fixtures,
@@ -497,7 +651,8 @@ def main():
     index.write_text(index.read_text(encoding="utf-8")
                      .replace("__FIXTURES_JSON__", data_json.replace("</", "<\\/")), encoding="utf-8")
     (OUT / ".nojekyll").touch()
-    print(f"✓ Built site into {rel(OUT)}/ (+ admin/ home booking export: {len(bookings)} lists)")
+    extra = f" (+ admin/ home booking export: {len(bookings)} lists)" if bookings is not None else ""
+    print(f"✓ Built site into {rel(OUT)}/{extra}")
 
 
 if __name__ == "__main__":

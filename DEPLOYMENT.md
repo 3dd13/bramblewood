@@ -1,7 +1,9 @@
 # Deployment
 
-> **Status:** live at https://3dd13.github.io/bramblewood/ since 2026-09-25,
-> deployed by `.github/workflows/ci.yml` from `main`. Repository: https://github.com/3dd13/bramblewood
+Each club's site is deployed by `.github/workflows/ci.yml` from `main` of its
+own repo, `<owner>/<repo>`, to `https://<owner>.github.io/<repo>/`. The
+step-by-step setup for a new club is in [SETUP.md](SETUP.md); a club's own
+deployment history and status go in its `CLUB.md`.
 
 ## 1. Decision: source on `main`, build output never committed
 
@@ -41,7 +43,7 @@ push / pull request
  ├─ checks  : validate data → pytest (build, ICS, privacy guard) → build _site → privacy guard
  │            → lychee link check → upload Pages artifact (main only)
  ├─ e2e     : Playwright behaviour + visual + accessibility + smoke → report artifact
- └─ deploy  : main only, needs checks + e2e → actions/deploy-pages → https://3dd13.github.io/bramblewood/
+ └─ deploy  : main only, needs checks + e2e → actions/deploy-pages → https://<owner>.github.io/<repo>/
 ```
 
 | Workflow | Trigger | Purpose |
@@ -64,7 +66,7 @@ push / pull request
   cut off halfway. Superseded PR runs are cancelled.
 - The `github-pages` environment is limited to `main` (see §3).
 
-## 3. Repository settings (applied 2026-09-25)
+## 3. Repository settings
 
 1. **Settings → Pages → Source:** "GitHub Actions".
 2. **Settings → Environments → `github-pages`:** deployment branches → `main` only.
@@ -74,26 +76,33 @@ push / pull request
      block them, but a failing check stops the deploy, so the live site stays safe.
 4. **Settings → Actions → General:** workflow permissions "Read repository
    contents" (the default). Allow GitHub Actions to create PRs: off.
-5. **Not set yet (owner's decision, 2026-09-25):** the name check has only been run locally so far. When wanted, add **Settings → Secrets and variables → Actions:** `PRIVACY_BLOCKLIST`
-   (one member name per line), taken from the club spreadsheet. Don't keep a copy in the repo.
+5. **Settings → Secrets and variables → Actions:** `PRIVACY_BLOCKLIST`
+   (one member name per line), taken from the club's member list. Optional, but
+   without it CI skips the name check. Don't keep a copy in the repo.
 6. **Settings → Code security:** enable Dependabot alerts and secret scanning with push protection.
 
-## 4. Going live (done 2026-09-25)
+## 4. Going live
 
-- [x] Created the public repo `3dd13/bramblewood`. Commits use the GitHub no-reply address `223555+3dd13@users.noreply.github.com`, so no personal email is published.
-- [x] Final audit: only needed files are tracked, and there's no personal data or secrets in the history. Checked against the private name list locally.
-- [x] Settings from §3: Pages source, environment, Actions token, security features and branch protection
-- [x] First push: the checks passed, and the Playwright job failed only on the missing Linux baselines (expected)
-- [x] Generated the baselines with **Update screenshot baselines** on a branch (PR #3), reviewed them, and merged once green
-- [x] Deployed. The site, `fixtures.json` and all `.ics` feeds are served (`text/calendar`, 84 events in `all.ics`)
-- [ ] Subscribe to one feed in Google and Apple Calendar to confirm it works (owner)
-- [ ] Optional: add the `PRIVACY_BLOCKLIST` secret (§3.5)
+The owner decides when the site goes live. For each new club:
+
+- [ ] Create the public repo `<owner>/<repo>` (a fork of the base repo; SETUP.md §2). Commit with a GitHub no-reply address, so no personal email is published.
+- [ ] Final audit: only needed files are tracked (`git ls-files`), and there's no personal data or secrets in the history (`git log -p`). Run the privacy guard with the private name list.
+- [ ] Apply the settings from §3: Pages source, environment, Actions token, security features and branch protection.
+- [ ] First push: `checks` and `e2e` pass (Linux baselines come from upstream; TESTING.md §4), then `deploy` runs.
+- [ ] Check the site, `fixtures.json` and every `.ics` feed are served (`text/calendar`).
+- [ ] Subscribe to one feed in Google and Apple Calendar to confirm it works.
+- [ ] Record the go-live date and anything still open in `CLUB.md`.
 
 ### Merging without exposing a personal email
 Merges made with GitHub's web button use the account's commit email. Either
 turn on **GitHub → Settings → Emails → "Keep my email addresses private"**
 (and "Block command line pushes that expose my email"), or merge green PRs as a
 fast-forward from a clone (`git merge --ff-only <branch> && git push`).
+
+### Updates from upstream
+Forks pull code and doc changes from the base repo with
+`git fetch upstream && git merge upstream/main` (SETUP.md §6). The merge
+commit goes through the same checks before it deploys.
 
 ## Previews
 GitHub Pages has no per-PR preview deployments. For review, use the Playwright

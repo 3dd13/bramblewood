@@ -1,9 +1,10 @@
-// Bramblewood fixtures: Overview (team cards) and Fixtures (list or calendar) for every team.
+// Club fixtures: Overview (team cards) and Fixtures (list or calendar) for every team.
 // The build (scripts/build.py) inlines the data as JSON in #fixtures-data; nothing is fetched.
 (() => {
   "use strict";
 
   const DATA = JSON.parse(document.getElementById("fixtures-data").textContent);
+  const CLUB = DATA.club; // from data/club.yaml: names, website and locale
   const $ = (id) => document.getElementById(id);
 
   // ── Team colours: one colour family per league ─────────────────────────
@@ -54,7 +55,7 @@
   const isoDate = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
   const parseDate = (s) => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
   const TODAY = isoDate(new Date());
-  const fmt = (opts) => new Intl.DateTimeFormat("en-GB", opts);
+  const fmt = (opts) => new Intl.DateTimeFormat(CLUB.locale, opts);
   const F_MONTH = fmt({ month: "long", year: "numeric" });
   const F_MONTH_SHORT = fmt({ month: "short" });
   const F_DOW = fmt({ weekday: "short" });
@@ -179,7 +180,7 @@
       set(patch) { Object.assign(state, patch); api.changed(); },
       onChange(fn) { listeners.push(fn); },
       changed() { state.month = clampMonth(state.month || defaultMonth()); writeUrl(); listeners.forEach((fn) => fn(state)); },
-      lastUpdated: new Date(DATA.generated).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
+      lastUpdated: new Date(DATA.generated).toLocaleDateString(CLUB.locale, { day: "numeric", month: "short", year: "numeric" }),
     };
     return api;
   })();
@@ -262,7 +263,7 @@
     ? extLink(t.resultsUrl, t.division ? "League table & results" : "Latest results", cls, `${t.code} league results`)
     : null);
   // Team filter order: alphabetical by code ("CR Mens", "CR Mixed", …). Colours still follow teams.yaml order.
-  const byCode = (a, b) => a.code.localeCompare(b.code, "en-GB", { numeric: true, sensitivity: "base" });
+  const byCode = (a, b) => a.code.localeCompare(b.code, CLUB.locale, { numeric: true, sensitivity: "base" });
   const teamsByCode = () => [...F.teams].sort(byCode);
   const selTeams = () => teamsByCode().filter((t) => F.state.teams.has(t.slug));
   const selectedTeam = () => (F.state.teams.size === 1 ? selTeams()[0] : null);
@@ -489,7 +490,7 @@
     const list = F.filtered();
     const played = list.filter(F.isPast).length;
     const title = team ? team.name : sel.length ? `${sel.length} teams: ${sel.map((t) => t.code).join(", ")}` : "All teams";
-    const leagues = team ? [leagueLine(team)] : sel.length ? [...new Set(sel.map((t) => t.league))] : ["Every Bramblewood team"];
+    const leagues = team ? [leagueLine(team)] : sel.length ? [...new Set(sel.map((t) => t.league))] : [`Every ${CLUB.shortName} team`];
     const withResults = sel.filter((t) => t.resultsUrl);
     return el("section", { class: `sel-card${team ? " sel-card--team" : sel.length ? " sel-card--multi" : ""}`, style: team ? tc(team) : null,
       "aria-labelledby": "sel-h" },
@@ -664,7 +665,8 @@
   }
 
   // ── Footer ────────────────────────────────────────────────────────────
-  const CLUB_URL = "https://www.bramblewoodbadminton.club/";
+  // "https://www.example.club/" -> "example.club": the link text people recognise.
+  const siteLabel = (url) => new URL(url).hostname.replace(/^www\./, "");
   // One entry per league; teams sharing a results page (e.g. Tunbridge Wells) collapse into one link.
   function leagueLinks() {
     const byLeague = new Map();
@@ -693,8 +695,8 @@
           class: "map-link", "aria-label": `Open ${F.home.name} in Google Maps` }, "Map"))),
     leagueLinks(),
     el("div", {},
-      el("p", { class: "foot-h" }, "Bramblewood Badminton Club"),
-      el("p", {}, extLink(CLUB_URL, "bramblewoodbadminton.club", "foot-link", "Club website")),
+      el("p", { class: "foot-h" }, CLUB.fullName),
+      CLUB.websiteUrl ? el("p", {}, extLink(CLUB.websiteUrl, siteLabel(CLUB.websiteUrl), "foot-link", "Club website")) : null,
       el("p", {}, seps("", [F.season ? `${F.season} season` : null,
         ["Last updated ", el("time", { datetime: F.data.generated }, F.lastUpdated)]]))));
   document.querySelectorAll("[data-season]").forEach((n) => { n.textContent = F.season; n.hidden = !F.season; });

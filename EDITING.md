@@ -19,9 +19,9 @@ Copy an existing entry and change it:
 
 ```yaml
 - date: 2026-11-12          # YYYY-MM-DD
-  team: CR Mens             # must match a `code` in data/teams.yaml
+  team: A Mens              # must match a `code` in data/teams.yaml
   home_away: A              # H or A
-  opponent: Felbridge B     # club name (+ optional team letter)
+  opponent: Riverside B     # club name (+ optional team letter)
   time: "19:30"             # 24-hour; leave the line out if not known yet
   notes: Rearranged from 5 Nov   # optional, shown on the site
 ```
@@ -41,23 +41,44 @@ Indentation matters: every line after `- date:` starts with two spaces.
 | Club plays elsewhere in one league | Add a `leagues:` entry for that club in `data/venues.yaml` (see the example at the top of that file) |
 | New team / new season        | Add the team to `data/teams.yaml`                           |
 | League results link / division | Set `results_url` (a full `https://` link) and `division` for the team in `data/teams.yaml` |
+| Club name, website, colours | Edit `data/club.yaml` (see below) |
 
 The calendar feeds (`.ics`) update with every deploy. Subscribed calendars pick
 up changes the next time they refresh, which can take from a few hours up to a
 day for Google Calendar.
 
+## Club settings (`data/club.yaml`)
+
+One file describes the club. You rarely need to change it after setup.
+
+| Field | Required | What it does |
+|---|---|---|
+| `club.short_name` | yes | Short name used in headings and calendar names |
+| `club.full_name` | yes | Full club name |
+| `club.website_url` | no | Club website, linked in the footer (full `https://` link) |
+| `site.title` | yes | Page title |
+| `site.description` | yes | One-line description for search engines and link previews |
+| `site.locale` | yes | Language tag, `en-GB` |
+| `site.timezone` | yes | `Europe/London` (the only value supported for now) |
+| `calendar.uid_domain` | yes | Suffix of every calendar event ID, e.g. `riverside-fixtures`. **Never change it after launch:** subscribers would see every match twice |
+| `season.start_month` | yes | Month the season starts, as a number (`8` = August) |
+| `branding.brand` | no | Main colour, in quotes, e.g. `"#4f46e5"` (the default indigo if left out) |
+| `branding.brand_ink`, `brand_dark`, `brand_ink_dark`, `focus_dark` | no | Brand text colour, and the dark-mode brand, brand text and focus colours. Defaults are used for any left out; check text contrast (4.5:1) in both themes |
+| `bookings.club_night_weekday` | no | Day name, e.g. `thursday`. Turns on the admin booking export below; leave the whole `bookings:` section out to turn it off |
+
 ## Home venue booking export (admins)
 
-For booking the hall with the venue manager, the site builds an unlisted admin page:
+If `bookings:` is set in `data/club.yaml`, the site builds an unlisted admin
+page for booking the hall with the venue manager:
 
-**https://3dd13.github.io/bramblewood/admin/**
+`https://<your-site>/admin/`
 
 It links to CSV files (columns `Date,Day,Matches`, e.g. `8 Oct 2026,Thu,1`):
 
 | File | Contents |
 |---|---|
 | `home-bookings-oct-dec-2026.csv` (and `jan-mar-2027`, `apr-jun-2027`, …) | Every date with a home match in that quarter, and how many |
-| `home-bookings-thursdays-2026-27.csv` | Thursday home dates only, for the whole season (these need special arrangement with the venue) |
+| `home-bookings-<club night>s-2026-27.csv` (e.g. `thursdays`) | Home dates on the club-night weekday only, for the whole season (these usually need special arrangement with the venue) |
 
 - The files update automatically every time the fixtures change, so there's nothing to run. Download a fresh copy before sending it to the venue.
 - Past dates stay in the files as a booking record. Away matches are never included.

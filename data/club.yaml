@@ -1,0 +1,34 @@
+# Who the club is and how the site looks. Every club-specific setting lives here,
+# so another club can reuse this site by editing this file (plus teams/venues/fixtures).
+
+club:
+  short_name: Bramblewood                         # used in calendar names and "Every Bramblewood team"
+  full_name: Bramblewood Badminton Club           # page heading and footer
+  website_url: https://www.bramblewoodbadminton.club/   # optional, must start with https://
+
+site:
+  title: Bramblewood Fixtures                     # browser tab title
+  description: "Match fixtures for every Bramblewood Badminton Club team: dates, times, venues, and calendar feeds you can subscribe to."
+  locale: en-GB                                   # date and number formats
+  timezone: Europe/London                         # only Europe/London is supported for now
+
+calendar:
+  # Ends every calendar event's ID. NEVER change it after launch: subscribers
+  # would see every match twice.
+  uid_domain: bramblewood-fixtures
+
+season:
+  start_month: 8                                  # 8 = August: a season runs Aug–Jul, e.g. "26/27"
+
+branding:
+  # Colours as #rrggbb. Only `brand` is needed; the rest default to the original indigo theme.
+  brand: "#4f46e5"            # buttons, logo, favicon, focus outline (light mode)
+  brand_ink: "#3730a3"        # link text (light mode)
+  brand_dark: "#8b85ff"       # dark mode version of `brand`
+  brand_ink_dark: "#b9b5ff"   # dark mode link text
+  focus_dark: "#a5a0ff"       # dark mode focus outline
+
+bookings:
+  # Optional. Builds the unlisted admin/ export of home dates for the venue manager.
+  # Remove this section to skip it. club_night_weekday adds an extra list for that weekday.
+  club_night_weekday: thursday

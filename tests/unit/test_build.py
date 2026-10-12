@@ -68,12 +68,13 @@ def test_club_of(opponent, club):
     assert build.club_of(opponent) == club
 
 
-@pytest.mark.parametrize("date,season", [
-    ("2026-08-01", "26/27"), ("2026-10-08", "26/27"), ("2027-05-28", "26/27"),
-    ("2027-07-31", "26/27"), ("2027-08-01", "27/28"), ("2099-12-31", "99/00"),
+@pytest.mark.parametrize("date,start_month,season", [
+    ("2026-08-01", 8, "26/27"), ("2026-10-08", 8, "26/27"), ("2027-05-28", 8, "26/27"),
+    ("2027-07-31", 8, "26/27"), ("2027-08-01", 8, "27/28"), ("2099-12-31", 8, "99/00"),
+    ("2026-08-31", 9, "25/26"), ("2026-09-01", 9, "26/27"), ("2027-01-01", 1, "27/28"),
 ])
-def test_season_of(date, season):
-    assert build.season_of(dt.date.fromisoformat(date)) == season
+def test_season_of(date, start_month, season):
+    assert build.season_of(dt.date.fromisoformat(date), start_month) == season
 
 
 def test_slug():
@@ -160,6 +161,8 @@ def test_output_files(built_site):
         assert (built_site / rel).is_file(), rel
     html = (built_site / "index.html").read_text()
     assert "__FIXTURES_JSON__" not in html
+    for name in ("index.html", "style.css", "favicon.svg"):  # every club placeholder filled in
+        assert not re.search(r"__[A-Z_]+__", (built_site / name).read_text()), name
 
 
 def test_fixtures_json_shape_and_order(built_site):
@@ -228,7 +231,7 @@ def test_feed_event_counts_match_fixtures(built_site):
 
 def test_timed_and_all_day_events(built_site):
     evs = {str(e["UID"]): e for e in events(load_cal(built_site / "calendar" / "all.ics"))}
-    timed = evs["2026-11-17-aa-mens-hilltop@bramblewood-fixtures"]
+    timed = evs["2026-11-17-aa-mens-hilltop@testtown-fixtures"]
     start, end = timed.decoded("DTSTART"), timed.decoded("DTEND")
     assert str(start.tzinfo) in ("Europe/London", "GMT", "BST") or "London" in str(start.tzinfo)
     assert (start.hour, start.minute) == (19, 30)
@@ -236,15 +239,15 @@ def test_timed_and_all_day_events(built_site):
     assert "Hilltop School" in str(timed["LOCATION"])
     assert str(timed["SUMMARY"]) == "AA Mens v Hilltop (Away)"
 
-    all_day = evs["2027-01-15-dd-combi-meadow@bramblewood-fixtures"]
+    all_day = evs["2027-01-15-dd-combi-meadow@testtown-fixtures"]
     assert all_day.decoded("DTSTART") == dt.date(2027, 1, 15)
     assert "Start time TBC" in str(all_day["DESCRIPTION"])
 
 
 def test_bst_and_gmt_offsets(built_site):
     evs = {str(e["UID"]): e for e in events(load_cal(built_site / "calendar" / "all.ics"))}
-    oct_bst = evs["2026-10-08-aa-mens-riverside-a@bramblewood-fixtures"].decoded("DTSTART")
-    nov_gmt = evs["2026-11-17-aa-mens-hilltop@bramblewood-fixtures"].decoded("DTSTART")
+    oct_bst = evs["2026-10-08-aa-mens-riverside-a@testtown-fixtures"].decoded("DTSTART")
+    nov_gmt = evs["2026-11-17-aa-mens-hilltop@testtown-fixtures"].decoded("DTSTART")
     assert oct_bst.utcoffset() == dt.timedelta(hours=1)
     assert nov_gmt.utcoffset() == dt.timedelta(0)
 
@@ -425,3 +428,112 @@ def test_booking_admin_page_is_unlisted(built_site):
     # The public pages never link to it (note "badminton" contains "admin", so look for the path).
     for public in ("index.html", "app.js"):
         assert not re.search(r"admin/", (built_site / public).read_text()), public
+
+
+# ── Club settings (club.yaml) ──────────────────────────────────────────────
+
+def edit_club(data_dir, old, new):
+    text = (data_dir / "club.yaml").read_text(encoding="utf-8")
+    assert old in text
+    (data_dir / "club.yaml").write_text(text.replace(old, new, 1), encoding="utf-8")
+
+
+def test_club_settings_reach_the_site(built_site):
+    html = (built_site / "index.html").read_text()
+    assert '<html lang="en-GB">' in html and "<title>Testtown Fixtures</title>" in html
+    assert "<h1>Testtown Badminton Club</h1>" in html
+    club = json.loads((built_site / "fixtures.json").read_text())["club"]
+    assert club == {"shortName": "Testtown", "fullName": "Testtown Badminton Club",
+                    "websiteUrl": "https://example.org/testtown/", "locale": "en-GB"}
+    ics = (built_site / "calendar" / "all.ics").read_text()
+    assert "PRODID:-//Testtown//Fixtures//EN" in ics and "X-WR-CALNAME:Testtown – all matches" in ics
+
+
+def test_branding_colours_are_applied(data_dir, tmp_path):
+    edit_club(data_dir, 'brand: "#4f46e5"', 'brand: "#0a7d3b"\n  focus_dark: "#7ee2a8"')
+    res = run_build(data_dir, tmp_path / "out")
+    assert res.returncode == 0, res.stderr
+    out = tmp_path / "out"
+    assert 'fill="#0a7d3b"' in (out / "favicon.svg").read_text()
+    assert '<meta name="theme-color" content="#0a7d3b">' in (out / "index.html").read_text()
+    css = (out / "style.css").read_text()
+    assert "--brand: #0a7d3b;" in css and "--focus: #7ee2a8;" in css
+    assert "--brand-ink: #3730a3;" in css  # left out -> default
+
+
+def test_site_text_is_html_escaped(data_dir, tmp_path):
+    edit_club(data_dir, "title: Testtown Fixtures", 'title: "Testtown <Fixtures> & \'Results\'"')
+    res = run_build(data_dir, tmp_path / "out")
+    assert res.returncode == 0, res.stderr
+    assert "<title>Testtown &lt;Fixtures&gt; &amp; &#x27;Results&#x27;</title>" in (tmp_path / "out" / "index.html").read_text()
+
+
+def test_website_url_is_optional(data_dir, tmp_path):
+    edit_club(data_dir, "  website_url: https://example.org/testtown/\n", "")
+    res = run_build(data_dir, tmp_path / "out")
+    assert res.returncode == 0, res.stderr
+    assert json.loads((tmp_path / "out" / "fixtures.json").read_text())["club"]["websiteUrl"] == ""
+
+
+@pytest.mark.parametrize("old,new,message", [
+    ("  short_name: Testtown\n", "", "Missing `short_name` under `club:`"),
+    ("calendar:\n  uid_domain: testtown-fixtures\n", "", "Missing section `calendar:`"),
+    ("  locale: en-GB", "  locale: en-GB\n  colour: blue", "Unknown setting 'colour' in `site:`"),
+    ("season:", "seasons:\n  x: y\nseason:", "Unknown section 'seasons'"),
+    ("https://example.org/testtown/", "http://example.org/testtown/", "website_url must be a full https:// link"),
+    ("club_night_weekday: thursday", "club_night_weekday: thurs", "club_night_weekday must be a day name"),
+    ("timezone: Europe/London", "timezone: Europe/Paris", "Timezone 'Europe/Paris' is not supported yet"),
+    ("start_month: 8", "start_month: 13", "start_month must be a month number 1–12"),
+    ('brand: "#4f46e5"', "brand: indigo", "`branding.brand` must be a colour"),
+    ("uid_domain: testtown-fixtures", "uid_domain: Testtown Fixtures", "Bad uid_domain"),
+])
+def test_invalid_club_settings_are_rejected(data_dir, old, new, message):
+    edit_club(data_dir, old, new)
+    res = run_build(data_dir, check=True)
+    assert res.returncode == 1
+    assert message in res.stderr and "club.yaml" in res.stderr
+
+
+def test_missing_club_file_is_reported(data_dir):
+    (data_dir / "club.yaml").unlink()
+    res = run_build(data_dir, check=True)
+    assert res.returncode == 1
+    assert "club.yaml  File is missing" in res.stderr
+
+
+def test_club_errors_point_at_the_line(data_dir):
+    edit_club(data_dir, "timezone: Europe/London", "timezone: UTC")
+    res = run_build(data_dir, check=True)
+    line = next(i for i, l in enumerate((data_dir / "club.yaml").read_text().splitlines(), 1) if "timezone:" in l)
+    assert f"club.yaml:{line}" in res.stderr
+
+
+def test_bookings_omitted_means_no_admin_export(data_dir, tmp_path):
+    edit_club(data_dir, "bookings:\n  club_night_weekday: thursday\n", "")
+    res = run_build(data_dir, tmp_path / "out")
+    assert res.returncode == 0, res.stderr
+    assert not (tmp_path / "out" / "admin").exists()
+
+
+def test_club_night_weekday_names_the_extra_list(data_dir, tmp_path):
+    # Test data home dates on Fridays: 23 Oct, 20 Nov, 4 Dec, 11 Dec 2026; 22 Jan 2027.
+    edit_club(data_dir, "club_night_weekday: thursday", "club_night_weekday: Friday")
+    res = run_build(data_dir, tmp_path / "out")
+    assert res.returncode == 0, res.stderr
+    admin = tmp_path / "out" / "admin"
+    rows = read_csv(admin / "home-bookings-fridays-2026-27.csv")
+    assert len(rows) == 6 and all(r[1] == "Fri" for r in rows[1:])
+    assert not list(admin.glob("*thursdays*"))
+    assert "Fridays only, 2026/27" in (admin / "index.html").read_text()
+
+
+def test_season_start_month_is_respected(data_dir, tmp_path):
+    # With seasons starting in November, October 2026 matches belong to 25/26.
+    edit_club(data_dir, "start_month: 8", "start_month: 11")
+    res = run_build(data_dir, tmp_path / "out")
+    assert res.returncode == 0, res.stderr
+    fx = {f["id"]: f for f in json.loads((tmp_path / "out" / "fixtures.json").read_text())["fixtures"]}
+    assert fx["2026-10-08-aa-mens-riverside-a"]["season"] == "25/26"
+    assert fx["2026-11-17-aa-mens-hilltop"]["season"] == "26/27"
+    names = sorted(p.name for p in (tmp_path / "out" / "admin").glob("*thursdays*"))
+    assert names == ["home-bookings-thursdays-2025-26.csv", "home-bookings-thursdays-2026-27.csv"]

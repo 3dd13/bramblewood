@@ -1,0 +1,23 @@
+# FICTIONAL club for tests (TESTING.md §3). Never put real people here.
+club:
+  short_name: Testtown
+  full_name: Testtown Badminton Club
+  website_url: https://example.org/testtown/
+
+site:
+  title: Testtown Fixtures
+  description: Match fixtures for every Testtown Badminton Club team.
+  locale: en-GB
+  timezone: Europe/London
+
+calendar:
+  uid_domain: testtown-fixtures
+
+season:
+  start_month: 8
+
+branding:
+  brand: "#4f46e5"
+
+bookings:
+  club_night_weekday: thursday

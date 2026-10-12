@@ -11,7 +11,7 @@ const card = (page: Page, name: string) => page.locator(".team-card", { has: pag
 // ── Overview ──────────────────────────────────────────────────────────
 test("overview: page title, next match and one card per team", async ({ page }) => {
   const errors = await open(page);
-  await expect(page).toHaveTitle("Bramblewood Fixtures");
+  await expect(page).toHaveTitle("Testtown Fixtures");
   await expect(page.locator(".season-pill")).toHaveText("2026/27");
 
   const next = page.locator("#next-card");
@@ -287,7 +287,7 @@ test("league results links: team cards, selection card and footer", async ({ pag
   await expect(footer.getByRole("link", { name: /Men's Div 1/ })).toHaveAttribute("href", "https://example.org/north/mens-1");
   await expect(footer.getByRole("link", { name: /Mixed Div 2/ })).toHaveAttribute("href", "https://example.org/north/mixed-2");
   await expect(footer.getByRole("link", { name: /Latest results/ })).toHaveAttribute("href", "https://example.org/south/latest");
-  await expect(footer.getByRole("link", { name: /bramblewoodbadminton\.club/ })).toHaveAttribute("href", "https://www.bramblewoodbadminton.club/");
+  await expect(footer.getByRole("link", { name: /example\.org/ })).toHaveAttribute("href", "https://example.org/testtown/");
 
   // Selection card: one team → its link; several → one link per team that has one.
   await open(page, "view=list&teams=aa-mens");

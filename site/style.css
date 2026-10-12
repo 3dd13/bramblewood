@@ -1,4 +1,4 @@
-/* Bramblewood fixtures — "Team-first": bright, rounded, organised around teams. */
+/* __CLUB_SHORT_NAME__ fixtures — "Team-first": bright, rounded, organised around teams. */
 
 :root {
   --bg: #f4f6fb;
@@ -10,10 +10,10 @@
   --ha-fill: #4a5163;   /* Home = filled grey, Away = grey outline (shape, not colour) */
   --ha-on: #ffffff;
   --line: #e3e7f1;
-  --brand: #4f46e5;
-  --brand-ink: #3730a3;
+  --brand: __BRAND__;
+  --brand-ink: __BRAND_INK__;
   --on-brand: #ffffff;
-  --focus: #4f46e5;
+  --focus: __BRAND__;
   --shadow: 0 1px 2px rgb(22 27 46 / 0.05), 0 6px 20px -8px rgb(22 27 46 / 0.14);
   --shadow-lg: 0 2px 4px rgb(22 27 46 / 0.05), 0 18px 40px -16px rgb(22 27 46 / 0.25);
   --r-lg: 20px;
@@ -41,10 +41,10 @@
   --ha-fill: #c2c8d6;
   --ha-on: #161d33;
   --line: #28314f;
-  --brand: #8b85ff;
-  --brand-ink: #b9b5ff;
+  --brand: __BRAND_DARK__;
+  --brand-ink: __BRAND_INK_DARK__;
   --on-brand: #0d1222;
-  --focus: #a5a0ff;
+  --focus: __FOCUS_DARK__;
   --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px -10px rgb(0 0 0 / 0.5);
   --shadow-lg: 0 2px 4px rgb(0 0 0 / 0.3), 0 18px 40px -14px rgb(0 0 0 / 0.6);
   --tint-amt: 20%;
@@ -67,10 +67,10 @@
     --ha-fill: #c2c8d6;
     --ha-on: #161d33;
     --line: #28314f;
-    --brand: #8b85ff;
-    --brand-ink: #b9b5ff;
+    --brand: __BRAND_DARK__;
+    --brand-ink: __BRAND_INK_DARK__;
     --on-brand: #0d1222;
-    --focus: #a5a0ff;
+    --focus: __FOCUS_DARK__;
     --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px -10px rgb(0 0 0 / 0.5);
     --shadow-lg: 0 2px 4px rgb(0 0 0 / 0.3), 0 18px 40px -14px rgb(0 0 0 / 0.6);
     --tint-amt: 20%;
