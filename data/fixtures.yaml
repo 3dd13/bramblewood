@@ -35,11 +35,6 @@
   home_away: H
   opponent: Forest
   time: "20:00"
-- date: 2026-10-12
-  team: WW Mens
-  home_away: A
-  opponent: Chanctonbury
-  time: "20:00"
 - date: 2026-10-15
   team: CR Mens
   home_away: H
@@ -445,6 +440,12 @@
   home_away: H
   opponent: AIT A
   time: "20:00"
+- date: 2027-05-12
+  team: WW Mens
+  home_away: A
+  opponent: Chanctonbury
+  time: "20:00"
+  notes: Rearranged from 12 Oct
 - date: 2027-05-14
   team: TW Mens 6
   home_away: H
