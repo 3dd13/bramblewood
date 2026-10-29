@@ -82,11 +82,6 @@
   home_away: A
   opponent: Crawley
   time: "19:30"
-- date: 2026-11-13
-  team: WW Combi
-  home_away: H
-  opponent: Felbridge
-  time: "20:00"
 - date: 2026-11-18
   team: WW Combi
   home_away: A
@@ -221,8 +216,14 @@
   home_away: H
   opponent: Hassocks
   time: "20:00"
+- date: 2027-01-29
+  team: WW Combi
+  home_away: H
+  opponent: Felbridge
+  time: "20:00"
+  notes: Rearranged from 13 Nov
 
-# ── February 2027 ───────────────────────────
+# ── February 2027───────────────────────────
 - date: 2027-02-03
   team: MS Ladies
   home_away: A
