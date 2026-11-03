@@ -42,6 +42,10 @@ clubs:
   Chanctonbury:
     name: Chanctonbury Leisure Centre
     address: Spierbridge Road, Storrington RH20 4PG
+  Crossways:
+    # No source for the venue yet (added 2026-11-03 for MS Ladies B); fill in, never guess.
+    name:
+    address:
   Crawley:
     name: St Wilfrid's Catholic School
     address: St Wilfrid's Way, Crawley RH11 8PG

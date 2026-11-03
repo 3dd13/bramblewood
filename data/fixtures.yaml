@@ -92,6 +92,11 @@
   home_away: H
   opponent: Horsham
   time: "20:00"
+- date: 2026-11-19
+  team: MS Ladies B
+  home_away: A
+  opponent: Crossways A
+  time: "20:00"
 - date: 2026-11-20
   team: TW Mixed 6
   home_away: A
@@ -211,6 +216,11 @@
   home_away: A
   opponent: Felbridge B
   time: "19:30"
+- date: 2027-01-28
+  team: MS Ladies B
+  home_away: H
+  opponent: Brighton B
+  time: "20:00"
 - date: 2027-01-29
   team: CR Mixed
   home_away: H
@@ -244,6 +254,11 @@
   home_away: H
   opponent: Chanctonbury
   time: "20:00"
+- date: 2027-02-09
+  team: MS Ladies B
+  home_away: A
+  opponent: Brighton B
+  time: "20:00"
 - date: 2027-02-12
   team: TW Mens 6
   home_away: A
@@ -274,6 +289,11 @@
   home_away: H
   opponent: Felbridge A
   time: "20:00"
+- date: 2027-02-25
+  team: MS Ladies B
+  home_away: H
+  opponent: Crawley
+  time: "20:00"
 - date: 2027-02-26
   team: TW Mixed 6
   home_away: H
@@ -286,6 +306,11 @@
   home_away: A
   opponent: Felbridge
   time: "19:30"
+- date: 2027-03-03
+  team: MS Ladies B
+  home_away: A
+  opponent: BATS B
+  time: "20:00"
 - date: 2027-03-05
   team: CR Mixed
   home_away: H
@@ -336,6 +361,11 @@
   home_away: H
   opponent: Forest A
   time: "20:00"
+- date: 2027-03-18
+  team: MS Ladies B
+  home_away: H
+  opponent: Crossways A
+  time: "20:00"
 - date: 2027-03-19
   team: TW Mens 6
   home_away: H
@@ -360,6 +390,11 @@
   team: TW Mens 6
   home_away: H
   opponent: AIT A
+  time: "20:00"
+- date: 2027-03-25
+  team: MS Ladies B
+  home_away: H
+  opponent: BATS B
   time: "20:00"
 - date: 2027-03-30
   team: MS Combi
@@ -462,3 +497,8 @@
   home_away: H
   opponent: Crawley
   time: "20:00"
+- date: 2027-05-28
+  team: MS Ladies B
+  home_away: A
+  opponent: Crawley
+  time: "19:30"
